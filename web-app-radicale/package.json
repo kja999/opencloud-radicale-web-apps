@@ -24,6 +24,8 @@
     "@opencloud-eu/eslint-config": "^5.0.0",
     "@opencloud-eu/prettier-config": "^5.0.0",
     "@opencloud-eu/tsconfig": "^5.0.0",
+    "@opencloud-eu/web-client": "^7.0.0",
+    "@opencloud-eu/web-pkg": "^7.0.0",
     "@types/node": "^24.0.0",
     "@vitejs/plugin-vue": "^5.2.0",
     "@vitest/coverage-v8": "^4.1.6",
@@ -34,6 +36,7 @@
     "happy-dom": "^20.0.0",
     "husky": "^9.1.0",
     "lint-staged": "^15.3.0",
+    "luxon": "^3.7.2",
     "prettier": "^3.5.3",
     "tailwindcss": "^4.0.0",
     "ts-node": "^10.9.2",
@@ -43,7 +46,8 @@
     "vitest": "^4.0.0",
     "vue": "^3.5.13",
     "vue-router": "^5.0.0",
-    "vue-tsc": "^3.0.0"
+    "vue-tsc": "^3.0.0",
+    "vue3-gettext": "^4.0.0-beta.1"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.20",
@@ -54,12 +58,6 @@
     "@opencloud-eu/extension-sdk": "^7.0.0",
     "fast-xml-parser": "^4.5.3",
     "ical.js": "^2.2.1"
-  },
-  "peerDependencies": {
-    "@opencloud-eu/design-system": "^7.0.0",
-    "@opencloud-eu/web-client": "^7.0.0",
-    "@opencloud-eu/web-pkg": "^7.0.0",
-    "vue3-gettext": "^4.0.0-beta.1"
   },
   "lint-staged": {
     "*.{js,ts,vue}": "eslint --fix",
