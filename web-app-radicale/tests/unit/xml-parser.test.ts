@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { parseCurrentUserPrincipal, parseCalendarHomeSet, parseCalendars, parseEvents } from '../../src/caldav/xml-parser'
+import {
+  parseCurrentUserPrincipal,
+  parseCalendarHomeSet,
+  parseCalendars,
+  parseEvents
+} from '../../src/caldav/xml-parser'
 
 describe('xml-parser', () => {
   describe('parseCurrentUserPrincipal', () => {
