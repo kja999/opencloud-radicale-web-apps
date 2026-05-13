@@ -3,10 +3,7 @@ import {
   buildPropfindCurrentUserPrincipal,
   buildPropfindCalendarHome,
   buildPropfindCalendars,
-  buildCalendarQuery,
-  buildPropfindAddressbookHome,
-  buildPropfindAddressbooks,
-  buildAddressbookQuery
+  buildCalendarQuery
 } from '../../src/caldav/xml-builder'
 
 describe('xml-builder (caldav)', () => {
@@ -34,8 +31,8 @@ describe('xml-builder (caldav)', () => {
       expect(xml).toContain('<D:displayname')
       expect(xml).toContain('<D:resourcetype')
       expect(xml).toContain('<C:calendar-description')
-      expect(xml).toContain('<C:calendar-color')
-      expect(xml).toContain('<C:ctag')
+      expect(xml).toContain('<A:calendar-color')
+      expect(xml).toContain('<CS:getctag')
     })
   })
 
@@ -60,35 +57,6 @@ describe('xml-builder (caldav)', () => {
 
       expect(xml).toContain('start="20240615T120000Z"')
       expect(xml).toContain('end="20240615T140000Z"')
-    })
-  })
-
-  describe('buildPropfindAddressbookHome', () => {
-    it('generates valid PROPFIND XML for addressbook-home-set', () => {
-      const xml = buildPropfindAddressbookHome()
-      expect(xml).toContain('<CA:addressbook-home-set')
-      expect(xml).toContain('xmlns:CA="urn:ietf:params:xml:ns:carddav"')
-    })
-  })
-
-  describe('buildPropfindAddressbooks', () => {
-    it('generates valid PROPFIND XML for addressbook properties', () => {
-      const xml = buildPropfindAddressbooks()
-      expect(xml).toContain('<D:displayname')
-      expect(xml).toContain('<D:resourcetype')
-      expect(xml).toContain('<CA:addressbook-description')
-      expect(xml).toContain('<CA:addressbook-color')
-      expect(xml).toContain('<C:ctag')
-    })
-  })
-
-  describe('buildAddressbookQuery', () => {
-    it('generates valid addressbook-query XML', () => {
-      const xml = buildAddressbookQuery()
-      expect(xml).toContain('<D:addressbook-query')
-      expect(xml).toContain('<D:getetag')
-      expect(xml).toContain('<CA:address-data')
-      expect(xml).toContain('<CA:filter')
     })
   })
 })

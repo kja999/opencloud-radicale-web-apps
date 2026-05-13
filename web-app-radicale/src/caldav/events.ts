@@ -30,14 +30,20 @@ async function report(url: string, body: string): Promise<string> {
 
 export async function fetchEvents(calendarHref: string, range: DateRange): Promise<CalendarEvent[]> {
   const xml = await report(calendarHref, buildCalendarQuery(range.start, range.end))
+  console.log('[CalDAV] REPORT response length:', xml.length, 'for', calendarHref)
   const eventData = parseEvents(xml)
+  console.log('[CalDAV] Parsed events from XML:', eventData.length)
 
   const events: CalendarEvent[] = []
   for (const data of eventData) {
     const parsed = parseICS(data.calendarData, data.href, data.etag, range)
+    for (const event of parsed) {
+      event.calendarHref = calendarHref
+    }
     events.push(...parsed)
   }
 
+  console.log('[CalDAV] Total parsed ICS events:', events.length)
   return events
 }
 

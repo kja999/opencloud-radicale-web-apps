@@ -125,7 +125,7 @@ export function parseCalendars(xml: string): CalendarData[] {
 
       const displayName = prop.displayname as string | undefined
       const color = prop['calendar-color'] as string | undefined
-      const ctag = prop.ctag as string | undefined
+      const ctag = (prop['getctag'] || prop['ctag']) as string | undefined
       const description = prop['calendar-description'] as string | undefined
 
       calendars.push({

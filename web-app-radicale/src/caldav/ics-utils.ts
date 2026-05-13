@@ -17,7 +17,7 @@ export function parseICS(icsData: string, href: string, etag: string, _range: Da
 
       const startDate = event.startDate
       const endDate = event.endDate
-      const allDay = !startDate.isDate
+      const allDay = startDate.isDate
 
       let start: Date
       let end: Date

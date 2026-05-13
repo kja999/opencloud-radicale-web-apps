@@ -18,13 +18,13 @@ export function buildPropfindCalendarHome(): string {
 
 export function buildPropfindCalendars(): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
-<D:propfind xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
+<D:propfind xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav" xmlns:CS="http://calendarserver.org/ns/" xmlns:A="http://apple.com/ns/ical/">
   <D:prop>
     <D:displayname />
     <D:resourcetype />
     <C:calendar-description />
-    <C:calendar-color />
-    <C:ctag />
+    <A:calendar-color />
+    <CS:getctag />
   </D:prop>
 </D:propfind>`
 }
@@ -52,35 +52,4 @@ export function buildCalendarQuery(start: Date, end: Date): string {
 </C:calendar-query>`
 }
 
-export function buildPropfindAddressbookHome(): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<D:propfind xmlns:D="DAV:" xmlns:CA="urn:ietf:params:xml:ns:carddav">
-  <D:prop>
-    <CA:addressbook-home-set />
-  </D:prop>
-</D:propfind>`
-}
 
-export function buildPropfindAddressbooks(): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<D:propfind xmlns:D="DAV:" xmlns:CA="urn:ietf:params:xml:ns:carddav">
-  <D:prop>
-    <D:displayname />
-    <D:resourcetype />
-    <CA:addressbook-description />
-    <CA:addressbook-color />
-    <C:ctag />
-  </D:prop>
-</D:propfind>`
-}
-
-export function buildAddressbookQuery(): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<D:addressbook-query xmlns:D="DAV:" xmlns:CA="urn:ietf:params:xml:ns:carddav">
-  <D:prop>
-    <D:getetag />
-    <CA:address-data />
-  </D:prop>
-  <CA:filter />
-</D:addressbook-query>`
-}

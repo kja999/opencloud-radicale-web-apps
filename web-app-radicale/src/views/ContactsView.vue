@@ -1,58 +1,43 @@
 <template>
-  <div class="h-full flex flex-col bg-white">
-    <div class="flex items-center justify-between p-4 border-b">
-      <h2 class="text-xl font-semibold">{{ t('Contacts') }}</h2>
-      <button @click="openNewContact" class="px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600">
-        {{ t('New Contact') }}
-      </button>
+  <div class="contacts-root">
+    <div class="contacts-header">
+      <h2 class="contacts-title">{{ t('Contacts') }}</h2>
+      <button class="contacts-btn-primary" @click="openNewContact">+ {{ t('New Contact') }}</button>
     </div>
 
-    <div class="flex-1 flex overflow-hidden">
-      <div class="w-64 border-r p-4 overflow-y-auto">
-        <h3 class="font-medium mb-3">{{ t('Contacts') }}</h3>
-        <div v-for="ab in addressbooks" :key="ab.href" class="flex items-center gap-2 mb-2">
-          <input type="checkbox" :checked="ab.visible" @change="toggleAddressbook(ab)" class="rounded" />
-          <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: ab.color }"></span>
-          <span class="text-sm truncate">{{ ab.displayName }}</span>
+    <div class="contacts-body">
+      <aside class="contacts-sidebar">
+        <h3 class="contacts-sidebar-title">{{ t('Address Books') }}</h3>
+        <div v-for="ab in addressbooks" :key="ab.href" class="contacts-sidebar-item">
+          <input type="checkbox" :checked="ab.visible" @change="toggleAddressbook(ab)" />
+          <span class="contacts-dot" :style="{ backgroundColor: ab.color }"></span>
+          <span class="contacts-sidebar-label">{{ ab.displayName }}</span>
         </div>
-        <div v-if="loading" class="text-sm text-gray-500">{{ t('Loading...') }}</div>
-        <div v-if="error" class="text-sm text-red-500">{{ t('Error loading data') }}</div>
-      </div>
+        <div v-if="loading" class="contacts-info">{{ t('Loading...') }}</div>
+        <div v-if="error" class="contacts-error">{{ t('Error loading data') }}</div>
+      </aside>
 
-      <div class="flex-1 overflow-auto p-4">
-        <div v-if="loading" class="flex items-center justify-center h-full">
-          <div class="text-gray-500">{{ t('Loading...') }}</div>
-        </div>
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <main class="contacts-main">
+        <div v-if="loading" class="contacts-loading">{{ t('Loading...') }}</div>
+        <div v-else-if="allContacts.length === 0" class="contacts-empty">{{ t('No contacts') }}</div>
+        <div v-else class="contacts-grid">
           <div
             v-for="contact in allContacts"
             :key="contact.uid"
-            class="border rounded-lg p-4 hover:shadow-md cursor-pointer transition-shadow"
+            class="contact-card"
             @click="openContact(contact)"
           >
-            <div class="flex items-center gap-3">
-              <div
-                class="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-medium"
-                :style="{ backgroundColor: getContactColor(contact) }"
-              >
-                {{ contact.fn.charAt(0).toUpperCase() }}
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="font-medium truncate">{{ contact.fn }}</div>
-                <div v-if="contact.organization" class="text-sm text-gray-500 truncate">
-                  {{ contact.organization }}
-                </div>
-              </div>
+            <div class="contact-avatar" :style="{ backgroundColor: getContactColor(contact) }">
+              {{ contact.fn.charAt(0).toUpperCase() }}
             </div>
-            <div v-if="contact.email?.length" class="mt-3 text-sm text-gray-600">
-              <div class="truncate">{{ contact.email[0] }}</div>
+            <div class="contact-info">
+              <div class="contact-name">{{ contact.fn }}</div>
+              <div v-if="contact.organization" class="contact-org">{{ contact.organization }}</div>
+              <div v-if="contact.email?.length" class="contact-email">{{ contact.email[0] }}</div>
             </div>
           </div>
         </div>
-        <div v-if="!loading && allContacts.length === 0" class="text-center text-gray-500 py-8">
-          {{ t('No contacts') }}
-        </div>
-      </div>
+      </main>
     </div>
 
     <ContactModal
@@ -167,3 +152,152 @@ onMounted(() => {
   loadData()
 })
 </script>
+
+<style scoped>
+.contacts-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: inherit;
+  color: var(--oc-color-text-default, #333);
+  background: var(--oc-color-background-default, #fff);
+}
+.contacts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--oc-color-border, #e2e8f0);
+}
+.contacts-title {
+  font-size: 1.2em;
+  font-weight: 600;
+  margin: 0;
+}
+.contacts-btn-primary {
+  padding: 8px 16px;
+  background: var(--oc-color-swatch-primary-default, #0070f3);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+.contacts-btn-primary:hover {
+  background: var(--oc-color-swatch-primary-hover, #005bb5);
+}
+.contacts-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+.contacts-sidebar {
+  width: 200px;
+  border-right: 1px solid var(--oc-color-border, #e2e8f0);
+  padding: 12px;
+  overflow-y: auto;
+}
+.contacts-sidebar-title {
+  font-weight: 600;
+  margin-bottom: 12px;
+  font-size: 0.9em;
+}
+.contacts-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.85em;
+}
+.contacts-sidebar-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.contacts-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.contacts-info {
+  font-size: 0.8em;
+  color: var(--oc-color-text-muted, #6b7280);
+}
+.contacts-error {
+  font-size: 0.8em;
+  color: var(--oc-color-swatch-danger-default, #dc2626);
+}
+.contacts-main {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+}
+.contacts-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--oc-color-text-muted, #6b7280);
+}
+.contacts-empty {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--oc-color-text-muted, #6b7280);
+}
+.contacts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.contact-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--oc-color-border, #e2e8f0);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+.contact-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.contact-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.1em;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.contact-info {
+  min-width: 0;
+  flex: 1;
+}
+.contact-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.contact-org {
+  font-size: 0.85em;
+  color: var(--oc-color-text-muted, #6b7280);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.contact-email {
+  font-size: 0.85em;
+  color: var(--oc-color-text-muted, #6b7280);
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+</style>

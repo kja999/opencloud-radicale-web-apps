@@ -50,6 +50,7 @@ export async function discoverCalendarHome(principalUrl: string): Promise<string
 export async function listCalendars(calendarHomeUrl: string): Promise<Calendar[]> {
   const xml = await propfind(calendarHomeUrl, buildPropfindCalendars(), '1')
   const calendarData = parseCalendars(xml)
+  console.log('[CalDAV] Discovered calendars:', calendarData.map(c => ({ href: c.href, name: c.displayName })))
 
   return calendarData.map(data => ({
     href: data.href || '',
