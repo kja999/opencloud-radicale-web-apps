@@ -67,6 +67,61 @@ describe('ics-utils', () => {
 
       expect(ics).toContain('SUMMARY:Test\\; with\\, special\\nchars')
     })
+
+    it('generates ICS with recurrence rule (WEEKLY)', () => {
+      const formData: EventFormData = {
+        summary: 'Weekly Meeting',
+        start: new Date('2024-01-15T10:00:00'),
+        end: new Date('2024-01-15T11:00:00'),
+        allDay: false,
+        calendarHref: '/calendars/user/',
+        recurrence: {
+          freq: 'WEEKLY',
+          interval: 1,
+          byDay: ['MO', 'WE', 'FR']
+        }
+      }
+
+      const ics = generateICS(formData)
+
+      expect(ics).toContain('RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,WE,FR')
+    })
+
+    it('generates ICS with recurrence rule (MONTHLY) with until', () => {
+      const formData: EventFormData = {
+        summary: 'Monthly Event',
+        start: new Date('2024-01-15'),
+        end: new Date('2024-01-16'),
+        allDay: true,
+        calendarHref: '/calendars/user/',
+        recurrence: {
+          freq: 'MONTHLY',
+          until: new Date('2024-12-31T23:59:59Z')
+        }
+      }
+
+      const ics = generateICS(formData)
+
+      expect(ics).toContain('RRULE:FREQ=MONTHLY;UNTIL=20241231T235959')
+    })
+
+    it('generates ICS with recurrence rule with count', () => {
+      const formData: EventFormData = {
+        summary: 'Limited Event',
+        start: new Date('2024-01-15'),
+        end: new Date('2024-01-16'),
+        allDay: true,
+        calendarHref: '/calendars/user/',
+        recurrence: {
+          freq: 'DAILY',
+          count: 10
+        }
+      }
+
+      const ics = generateICS(formData)
+
+      expect(ics).toContain('RRULE:FREQ=DAILY;COUNT=10')
+    })
   })
 
   describe('parseICS', () => {
@@ -118,6 +173,39 @@ END:VCALENDAR`
 
       expect(events).toHaveLength(1)
       expect(events[0].summary).toBe('All Day Event')
+    })
+
+    it('parses event with recurrence rule', () => {
+      const icsData = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20240115
+DTEND;VALUE=DATE:20240116
+SUMMARY:Recurring Event
+UID:recurring-event
+RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE
+END:VEVENT
+END:VCALENDAR`
+
+      const range: DateRange = {
+        start: new Date('2024-01-01'),
+        end: new Date('2024-12-31')
+      }
+
+      const events = parseICS(icsData, '/calendars/user/recurring.ics', 'etag-2', range)
+
+      expect(events).toHaveLength(1)
+      expect(events[0].summary).toBe('Recurring Event')
+    })
+
+    it('returns empty array for invalid ICS data', () => {
+      const range: DateRange = {
+        start: new Date('2024-01-01'),
+        end: new Date('2024-12-31')
+      }
+
+      expect(parseICS('invalid', '/test.ics', 'etag', range)).toEqual([])
+      expect(parseICS('', '/test.ics', 'etag', range)).toEqual([])
     })
   })
 })

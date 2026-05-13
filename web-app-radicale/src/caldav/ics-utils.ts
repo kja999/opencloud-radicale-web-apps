@@ -103,6 +103,9 @@ export function generateICS(formData: EventFormData): string {
     if (rrule.interval) rruleStr += `;INTERVAL=${rrule.interval}`
     if (rrule.until) rruleStr += `;UNTIL=${formatDateTime(rrule.until)}`
     if (rrule.count) rruleStr += `;COUNT=${rrule.count}`
+    if (rrule.byDay && rrule.byDay.length > 0) rruleStr += `;BYDAY=${rrule.byDay.join(',')}`
+    if (rrule.byMonthDay && rrule.byMonthDay.length > 0) rruleStr += `;BYMONTHDAY=${rrule.byMonthDay.join(',')}`
+    if (rrule.byMonth && rrule.byMonth.length > 0) rruleStr += `;BYMONTH=${rrule.byMonth.join(',')}`
     lines.push(rruleStr)
   }
 
