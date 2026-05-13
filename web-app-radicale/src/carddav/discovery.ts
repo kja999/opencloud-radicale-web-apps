@@ -55,7 +55,7 @@ export async function listAddressbooks(addressbookHomeUrl: string): Promise<Addr
   const xml = await propfind(addressbookHomeUrl, buildPropfindAddressbooks(), '1')
   const addressbookData = parseAddressbooks(xml)
 
-  return addressbookData.map((data) => ({
+  return addressbookData.map(data => ({
     href: data.href || '',
     displayName: data.displayName || 'Contacts',
     color: data.color || '#e74c3c',

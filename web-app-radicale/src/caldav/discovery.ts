@@ -1,9 +1,5 @@
 import { CalDAVError, AuthenticationError, NotFoundError } from './errors'
-import {
-  buildPropfindCurrentUserPrincipal,
-  buildPropfindCalendarHome,
-  buildPropfindCalendars
-} from './xml-builder'
+import { buildPropfindCurrentUserPrincipal, buildPropfindCalendarHome, buildPropfindCalendars } from './xml-builder'
 import { parseCurrentUserPrincipal, parseCalendarHomeSet, parseCalendars } from './xml-parser'
 import { authenticatedFetch } from './auth'
 import type { Calendar } from '../types/calendar'
@@ -55,7 +51,7 @@ export async function listCalendars(calendarHomeUrl: string): Promise<Calendar[]
   const xml = await propfind(calendarHomeUrl, buildPropfindCalendars(), '1')
   const calendarData = parseCalendars(xml)
 
-  return calendarData.map((data) => ({
+  return calendarData.map(data => ({
     href: data.href || '',
     displayName: data.displayName || 'Calendar',
     color: normalizeColor(data.color) || '#3788d8',

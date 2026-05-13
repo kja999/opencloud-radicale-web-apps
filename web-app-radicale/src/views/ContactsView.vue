@@ -2,10 +2,7 @@
   <div class="h-full flex flex-col bg-white">
     <div class="flex items-center justify-between p-4 border-b">
       <h2 class="text-xl font-semibold">{{ t('Contacts') }}</h2>
-      <button
-        @click="openNewContact"
-        class="px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
-      >
+      <button @click="openNewContact" class="px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600">
         {{ t('New Contact') }}
       </button>
     </div>
@@ -14,16 +11,8 @@
       <div class="w-64 border-r p-4 overflow-y-auto">
         <h3 class="font-medium mb-3">{{ t('Contacts') }}</h3>
         <div v-for="ab in addressbooks" :key="ab.href" class="flex items-center gap-2 mb-2">
-          <input
-            type="checkbox"
-            :checked="ab.visible"
-            @change="toggleAddressbook(ab)"
-            class="rounded"
-          />
-          <span
-            class="w-3 h-3 rounded-full"
-            :style="{ backgroundColor: ab.color }"
-          ></span>
+          <input type="checkbox" :checked="ab.visible" @change="toggleAddressbook(ab)" class="rounded" />
+          <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: ab.color }"></span>
           <span class="text-sm truncate">{{ ab.displayName }}</span>
         </div>
         <div v-if="loading" class="text-sm text-gray-500">{{ t('Loading...') }}</div>
@@ -97,9 +86,9 @@ const selectedContact = ref<Contact | null>(null)
 const selectedAddressbook = ref('')
 
 const allContacts = computed(() => {
-  const visibleAddressbooks = addressbooks.value.filter((ab) => ab.visible)
+  const visibleAddressbooks = addressbooks.value.filter(ab => ab.visible)
   return contacts.value
-    .filter((c) => visibleAddressbooks.some((ab) => ab.href === getAddressbookHref(c)))
+    .filter(c => visibleAddressbooks.some(ab => ab.href === getAddressbookHref(c)))
     .sort((a, b) => a.fn.localeCompare(b.fn))
 })
 
@@ -111,7 +100,7 @@ function getAddressbookHref(contact: Contact): string {
 
 function getContactColor(contact: Contact): string {
   const href = getAddressbookHref(contact)
-  const ab = addressbooks.value.find((a) => a.href === href)
+  const ab = addressbooks.value.find(a => a.href === href)
   return ab?.color || '#e74c3c'
 }
 
@@ -135,7 +124,7 @@ function toggleAddressbook(ab: Addressbook) {
 
 function openNewContact() {
   selectedContact.value = null
-  selectedAddressbook.value = addressbooks.value.find((ab) => ab.visible)?.href || addressbooks.value[0]?.href || ''
+  selectedAddressbook.value = addressbooks.value.find(ab => ab.visible)?.href || addressbooks.value[0]?.href || ''
   showContactModal.value = true
 }
 

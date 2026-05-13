@@ -36,16 +36,8 @@
       <div class="w-64 border-r p-4 overflow-y-auto">
         <h3 class="font-medium mb-3">{{ t('Calendar') }}</h3>
         <div v-for="cal in calendars" :key="cal.href" class="flex items-center gap-2 mb-2">
-          <input
-            type="checkbox"
-            :checked="cal.visible"
-            @change="toggleCalendar(cal)"
-            class="rounded"
-          />
-          <span
-            class="w-3 h-3 rounded-full"
-            :style="{ backgroundColor: cal.color }"
-          ></span>
+          <input type="checkbox" :checked="cal.visible" @change="toggleCalendar(cal)" class="rounded" />
+          <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: cal.color }"></span>
           <span class="text-sm truncate">{{ cal.displayName }}</span>
         </div>
         <div v-if="loading" class="text-sm text-gray-500">{{ t('Loading...') }}</div>
@@ -57,11 +49,7 @@
           <div class="text-gray-500">{{ t('Loading...') }}</div>
         </div>
         <div v-else-if="currentView === 'month'" class="grid grid-cols-7 gap-px bg-gray-200">
-          <div
-            v-for="day in weekDays"
-            :key="day"
-            class="bg-gray-50 p-2 text-center text-sm font-medium"
-          >
+          <div v-for="day in weekDays" :key="day" class="bg-gray-50 p-2 text-center text-sm font-medium">
             {{ day }}
           </div>
           <div
@@ -70,7 +58,12 @@
             class="bg-white min-h-[100px] p-1"
             :class="{ 'bg-gray-50': !day.isCurrentMonth }"
           >
-            <div class="text-sm mb-1" :class="day.isToday ? 'bg-primary-500 text-white rounded-full w-6 h-6 flex items-center justify-center' : ''">
+            <div
+              class="text-sm mb-1"
+              :class="
+                day.isToday ? 'bg-primary-500 text-white rounded-full w-6 h-6 flex items-center justify-center' : ''
+              "
+            >
               {{ day.date }}
             </div>
             <div
@@ -86,21 +79,18 @@
         </div>
         <div v-else-if="currentView === 'week'">
           <div class="grid grid-cols-7 gap-px bg-gray-200">
-            <div
-              v-for="day in weekDays"
-              :key="day"
-              class="bg-gray-50 p-2 text-center text-sm font-medium"
-            >
+            <div v-for="day in weekDays" :key="day" class="bg-gray-50 p-2 text-center text-sm font-medium">
               {{ day }}
             </div>
           </div>
           <div class="grid grid-cols-7 gap-px bg-gray-200">
-            <div
-              v-for="(day, idx) in weekDaysData"
-              :key="idx"
-              class="bg-white min-h-[400px] p-1"
-            >
-              <div class="text-sm mb-2" :class="day.isToday ? 'bg-primary-500 text-white rounded-full w-6 h-6 flex items-center justify-center' : ''">
+            <div v-for="(day, idx) in weekDaysData" :key="idx" class="bg-white min-h-[400px] p-1">
+              <div
+                class="text-sm mb-2"
+                :class="
+                  day.isToday ? 'bg-primary-500 text-white rounded-full w-6 h-6 flex items-center justify-center' : ''
+                "
+              >
                 {{ day.date }}
               </div>
               <div
@@ -124,14 +114,12 @@
             @click="openEvent(event)"
           >
             <div class="flex items-center gap-2">
-              <span
-                class="w-3 h-3 rounded-full"
-                :style="{ backgroundColor: event.color }"
-              ></span>
+              <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: event.color }"></span>
               <span class="font-medium">{{ event.summary }}</span>
             </div>
             <div class="text-sm text-gray-500 mt-1">
-              {{ formatDate(event.start) }} {{ event.allDay ? t('All Day') : formatTime(event.start) + ' - ' + formatTime(event.end) }}
+              {{ formatDate(event.start) }}
+              {{ event.allDay ? t('All Day') : formatTime(event.start) + ' - ' + formatTime(event.end) }}
             </div>
           </div>
           <div v-if="allEvents.length === 0" class="text-center text-gray-500 py-8">
@@ -257,18 +245,18 @@ const allEvents = computed(() => {
   const start = new Date(d.getFullYear(), d.getMonth(), 1)
   const end = new Date(d.getFullYear(), d.getMonth() + 1, 0)
 
-  const visibleCalendars = calendars.value.filter((c) => c.visible)
+  const visibleCalendars = calendars.value.filter(c => c.visible)
   return events.value
-    .filter((e) => visibleCalendars.some((c) => c.href === e.calendarHref))
-    .filter((e) => e.start >= start && e.start <= end)
+    .filter(e => visibleCalendars.some(c => c.href === e.calendarHref))
+    .filter(e => e.start >= start && e.start <= end)
     .sort((a, b) => a.start.getTime() - b.start.getTime())
 })
 
 function getEventsForDate(date: Date): CalendarEvent[] {
-  const visibleCalendars = calendars.value.filter((c) => c.visible)
+  const visibleCalendars = calendars.value.filter(c => c.visible)
   return events.value
-    .filter((e) => visibleCalendars.some((c) => c.href === e.calendarHref))
-    .filter((e) => {
+    .filter(e => visibleCalendars.some(c => c.href === e.calendarHref))
+    .filter(e => {
       const start = e.start
       const end = e.end
       if (e.allDay) {
@@ -276,9 +264,9 @@ function getEventsForDate(date: Date): CalendarEvent[] {
       }
       return date.toDateString() === start.toDateString()
     })
-    .map((e) => ({
+    .map(e => ({
       ...e,
-      color: calendars.value.find((c) => c.href === e.calendarHref)?.color || '#3788d8'
+      color: calendars.value.find(c => c.href === e.calendarHref)?.color || '#3788d8'
     }))
 }
 

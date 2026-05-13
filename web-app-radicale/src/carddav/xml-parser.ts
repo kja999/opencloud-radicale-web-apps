@@ -16,11 +16,13 @@ interface PropfindResponse {
 
 interface PropfindResponseItem {
   'd:href': string
-  'd:propstat'?: {
-    'd:prop': Record<string, unknown>
-  } | {
-    'd:prop': Record<string, unknown>
-  }[]
+  'd:propstat'?:
+    | {
+        'd:prop': Record<string, unknown>
+      }
+    | {
+        'd:prop': Record<string, unknown>
+      }[]
 }
 
 function extractProp(propstat: unknown): Record<string, unknown> | null {

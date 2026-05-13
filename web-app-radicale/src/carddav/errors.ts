@@ -1,5 +1,8 @@
 export class CardDAVError extends Error {
-  constructor(message: string, public statusCode?: number) {
+  constructor(
+    message: string,
+    public statusCode?: number
+  ) {
     super(message)
     this.name = 'CardDAVError'
   }
@@ -20,7 +23,10 @@ export class NotFoundError extends CardDAVError {
 }
 
 export class ConflictError extends CardDAVError {
-  constructor(message = 'Conflict detected', public currentEtag?: string) {
+  constructor(
+    message = 'Conflict detected',
+    public currentEtag?: string
+  ) {
     super(message, 412)
     this.name = 'ConflictError'
   }

@@ -8,33 +8,18 @@
       <form @submit.prevent="save" class="space-y-4">
         <div>
           <label class="block text-sm font-medium mb-1">{{ t('Title') }}</label>
-          <input
-            v-model="form.summary"
-            type="text"
-            class="w-full border rounded px-3 py-2"
-            required
-          />
+          <input v-model="form.summary" type="text" class="w-full border rounded px-3 py-2" required />
         </div>
 
         <div class="flex items-center gap-2">
-          <input
-            v-model="form.allDay"
-            type="checkbox"
-            id="allDay"
-            class="rounded"
-          />
+          <input v-model="form.allDay" type="checkbox" id="allDay" class="rounded" />
           <label for="allDay" class="text-sm">{{ t('All Day') }}</label>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium mb-1">{{ t('Start') }}</label>
-            <input
-              v-model="form.startDate"
-              type="date"
-              class="w-full border rounded px-3 py-2"
-              required
-            />
+            <input v-model="form.startDate" type="date" class="w-full border rounded px-3 py-2" required />
             <input
               v-if="!form.allDay"
               v-model="form.startTime"
@@ -45,12 +30,7 @@
           </div>
           <div>
             <label class="block text-sm font-medium mb-1">{{ t('End') }}</label>
-            <input
-              v-model="form.endDate"
-              type="date"
-              class="w-full border rounded px-3 py-2"
-              required
-            />
+            <input v-model="form.endDate" type="date" class="w-full border rounded px-3 py-2" required />
             <input
               v-if="!form.allDay"
               v-model="form.endTime"
@@ -63,20 +43,12 @@
 
         <div>
           <label class="block text-sm font-medium mb-1">{{ t('Location') }}</label>
-          <input
-            v-model="form.location"
-            type="text"
-            class="w-full border rounded px-3 py-2"
-          />
+          <input v-model="form.location" type="text" class="w-full border rounded px-3 py-2" />
         </div>
 
         <div>
           <label class="block text-sm font-medium mb-1">{{ t('Description') }}</label>
-          <textarea
-            v-model="form.description"
-            rows="3"
-            class="w-full border rounded px-3 py-2"
-          ></textarea>
+          <textarea v-model="form.description" rows="3" class="w-full border rounded px-3 py-2"></textarea>
         </div>
 
         <div class="flex justify-between pt-4">
@@ -89,17 +61,10 @@
             {{ t('Delete') }}
           </button>
           <div class="flex gap-2 ml-auto">
-            <button
-              type="button"
-              @click="$emit('close')"
-              class="px-4 py-2 border rounded hover:bg-gray-50"
-            >
+            <button type="button" @click="$emit('close')" class="px-4 py-2 border rounded hover:bg-gray-50">
               {{ t('Cancel') }}
             </button>
-            <button
-              type="submit"
-              class="px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
-            >
+            <button type="submit" class="px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600">
               {{ t('Save') }}
             </button>
           </div>
@@ -140,7 +105,7 @@ const form = ref({
 
 watch(
   () => props.event,
-  (ev) => {
+  ev => {
     if (ev) {
       form.value = {
         summary: ev.summary,

@@ -2,18 +2,13 @@ import ICAL from 'ical.js'
 import type { CalendarEvent, EventFormData, RecurrenceRule } from '../types/calendar'
 import type { DateRange } from '../types/calendar'
 
-export function parseICS(
-  icsData: string,
-  href: string,
-  etag: string,
-  _range: DateRange
-): CalendarEvent[] {
+export function parseICS(icsData: string, href: string, etag: string, _range: DateRange): CalendarEvent[] {
   try {
     const jcalData = ICAL.parse(icsData)
     const comp = new ICAL.Component(jcalData)
     const vevents = comp.getAllSubcomponents('vevent')
 
-    return vevents.map((vevent) => {
+    return vevents.map(vevent => {
       const event = new ICAL.Event(vevent)
       const uid = event.uid
       const summary = event.summary || ''
@@ -119,11 +114,7 @@ export function generateUID(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}@radicale`
 }
 
-export function addExceptionToICS(
-  icsData: string,
-  recurrenceId: string,
-  formData?: EventFormData
-): string {
+export function addExceptionToICS(icsData: string, recurrenceId: string, formData?: EventFormData): string {
   try {
     const jcalData = ICAL.parse(icsData)
     const comp = new ICAL.Component(jcalData)
@@ -135,12 +126,14 @@ export function addExceptionToICS(
     const exception = new ICAL.Component('VEVENT')
 
     if (formData) {
-      exception.addPropertyWithValue('dtstart', formData.allDay
-        ? ICAL.Time.fromJSDate(formData.start, true)
-        : ICAL.Time.fromJSDate(formData.start, false))
-      exception.addPropertyWithValue('dtend', formData.allDay
-        ? ICAL.Time.fromJSDate(formData.end, true)
-        : ICAL.Time.fromJSDate(formData.end, false))
+      exception.addPropertyWithValue(
+        'dtstart',
+        formData.allDay ? ICAL.Time.fromJSDate(formData.start, true) : ICAL.Time.fromJSDate(formData.start, false)
+      )
+      exception.addPropertyWithValue(
+        'dtend',
+        formData.allDay ? ICAL.Time.fromJSDate(formData.end, true) : ICAL.Time.fromJSDate(formData.end, false)
+      )
       exception.addPropertyWithValue('summary', formData.summary)
       if (formData.description) {
         exception.addPropertyWithValue('description', formData.description)
@@ -214,9 +207,5 @@ function formatDateOnly(date: Date): string {
 }
 
 function escapeICSText(text: string): string {
-  return text
-    .replace(/\\/g, '\\\\')
-    .replace(/;/g, '\\;')
-    .replace(/,/g, '\\,')
-    .replace(/\n/g, '\\n')
+  return text.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n')
 }

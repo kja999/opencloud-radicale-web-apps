@@ -8,10 +8,7 @@ export interface CreateCalendarData {
   color?: string
 }
 
-export async function createCalendar(
-  calendarHomeUrl: string,
-  data: CreateCalendarData
-): Promise<Calendar> {
+export async function createCalendar(calendarHomeUrl: string, data: CreateCalendarData): Promise<Calendar> {
   const calendarUrl = calendarHomeUrl + encodeURIComponent(data.displayName) + '/'
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>

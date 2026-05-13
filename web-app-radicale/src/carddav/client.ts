@@ -8,13 +8,7 @@ import {
 } from './contacts'
 import type { Addressbook, Contact, ContactFormData } from '../types/contacts'
 
-export {
-  CardDAVError,
-  AuthenticationError,
-  NotFoundError,
-  ConflictError,
-  NetworkError
-} from './errors'
+export { CardDAVError, AuthenticationError, NotFoundError, ConflictError, NetworkError } from './errors'
 
 export interface CardDAVClient {
   discoverAddressbooks(): Promise<Addressbook[]>
@@ -36,10 +30,8 @@ export function createCardDAVClient(): CardDAVClient {
     fetchContacts: fetchContactsFromAddressbook,
 
     async fetchAllContacts(addressbooks: Addressbook[]): Promise<Contact[]> {
-      const visibleAddressbooks = addressbooks.filter((ab) => ab.visible)
-      const results = await Promise.all(
-        visibleAddressbooks.map((ab) => fetchContactsFromAddressbook(ab.href))
-      )
+      const visibleAddressbooks = addressbooks.filter(ab => ab.visible)
+      const results = await Promise.all(visibleAddressbooks.map(ab => fetchContactsFromAddressbook(ab.href)))
       return results.flat()
     },
 

@@ -1,5 +1,8 @@
 export class CalDAVError extends Error {
-  constructor(message: string, public statusCode?: number) {
+  constructor(
+    message: string,
+    public statusCode?: number
+  ) {
     super(message)
     this.name = 'CalDAVError'
   }
@@ -20,7 +23,10 @@ export class NotFoundError extends CalDAVError {
 }
 
 export class ConflictError extends CalDAVError {
-  constructor(message = 'Conflict detected', public currentEtag?: string) {
+  constructor(
+    message = 'Conflict detected',
+    public currentEtag?: string
+  ) {
     super(message, 412)
     this.name = 'ConflictError'
   }

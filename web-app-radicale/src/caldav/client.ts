@@ -44,10 +44,8 @@ export function createCalDAVClient(): CalDAVClient {
     fetchEvents: fetchEventsFromCalendar,
 
     async fetchAllEvents(calendars: Calendar[], range: DateRange): Promise<CalendarEvent[]> {
-      const visibleCalendars = calendars.filter((c) => c.visible)
-      const results = await Promise.all(
-        visibleCalendars.map((cal) => fetchEventsFromCalendar(cal.href, range))
-      )
+      const visibleCalendars = calendars.filter(c => c.visible)
+      const results = await Promise.all(visibleCalendars.map(cal => fetchEventsFromCalendar(cal.href, range)))
       return results.flat()
     },
 

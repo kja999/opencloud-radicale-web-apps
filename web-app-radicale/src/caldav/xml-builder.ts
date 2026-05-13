@@ -30,7 +30,11 @@ export function buildPropfindCalendars(): string {
 }
 
 export function buildCalendarQuery(start: Date, end: Date): string {
-  const formatDate = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
+  const formatDate = (d: Date) =>
+    d
+      .toISOString()
+      .replace(/[-:]/g, '')
+      .replace(/\.\d{3}/, '')
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <C:calendar-query xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">

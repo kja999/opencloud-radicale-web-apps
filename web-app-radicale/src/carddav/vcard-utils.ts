@@ -73,11 +73,7 @@ export function parseVCard(vcardData: string, href: string, etag: string): Conta
 }
 
 export function generateVCard(formData: ContactFormData): string {
-  const lines: string[] = [
-    'BEGIN:VCARD',
-    'VERSION:3.0',
-    `FN:${escapeVCardText(formData.fn)}`
-  ]
+  const lines: string[] = ['BEGIN:VCARD', 'VERSION:3.0', `FN:${escapeVCardText(formData.fn)}`]
 
   if (formData.email?.length) {
     for (const e of formData.email) {
@@ -124,8 +120,5 @@ export function generateUID(): string {
 }
 
 function escapeVCardText(text: string): string {
-  return text
-    .replace(/\\/g, '\\\\')
-    .replace(/;/g, '\\;')
-    .replace(/,/g, '\\,')
+  return text.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,')
 }

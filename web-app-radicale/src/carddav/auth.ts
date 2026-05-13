@@ -17,7 +17,7 @@ export function getAccessToken(): string | null {
   if (!authStore) return null
   const token = authStore.accessToken
   if (isRef(token)) {
-    return token.value as string || null
+    return (token.value as string) || null
   }
   return (token as string) || null
 }
@@ -39,10 +39,7 @@ export function getUserId(): string | null {
   return (info as User)?.id || (info as User)?.mail || (info as User)?.displayName || null
 }
 
-export async function authenticatedFetch(
-  url: string,
-  options: RequestInit = {}
-): Promise<Response> {
+export async function authenticatedFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const headers = new Headers(options.headers)
 
   const userId = getUserId()

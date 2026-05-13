@@ -28,10 +28,7 @@ async function report(url: string, body: string): Promise<string> {
   return response.text()
 }
 
-export async function fetchEvents(
-  calendarHref: string,
-  range: DateRange
-): Promise<CalendarEvent[]> {
+export async function fetchEvents(calendarHref: string, range: DateRange): Promise<CalendarEvent[]> {
   const xml = await report(calendarHref, buildCalendarQuery(range.start, range.end))
   const eventData = parseEvents(xml)
 
@@ -87,10 +84,7 @@ export async function createEvent(formData: EventFormData): Promise<CalendarEven
   }
 }
 
-export async function updateEvent(
-  event: CalendarEvent,
-  formData: EventFormData
-): Promise<CalendarEvent> {
+export async function updateEvent(event: CalendarEvent, formData: EventFormData): Promise<CalendarEvent> {
   const icsData = generateICS({ ...formData, uid: event.uid })
 
   const response = await authenticatedFetch(event.href, {
@@ -176,10 +170,7 @@ export async function updateEventOccurrence(
   }
 }
 
-export async function deleteEventOccurrence(
-  event: CalendarEvent,
-  recurrenceId: string
-): Promise<void> {
+export async function deleteEventOccurrence(event: CalendarEvent, recurrenceId: string): Promise<void> {
   const updatedICS = addExceptionToICS(event.icsData, recurrenceId)
 
   const response = await authenticatedFetch(event.href, {
@@ -198,10 +189,7 @@ export async function deleteEventOccurrence(
   }
 }
 
-export async function updateEventSeries(
-  event: CalendarEvent,
-  formData: EventFormData
-): Promise<void> {
+export async function updateEventSeries(event: CalendarEvent, formData: EventFormData): Promise<void> {
   const updatedICS = updateSeriesICS(event.icsData, formData)
 
   const response = await authenticatedFetch(event.href, {

@@ -85,10 +85,7 @@ export async function createContact(formData: ContactFormData): Promise<Contact>
   }
 }
 
-export async function updateContact(
-  contact: Contact,
-  formData: ContactFormData
-): Promise<Contact> {
+export async function updateContact(contact: Contact, formData: ContactFormData): Promise<Contact> {
   const vcardData = generateVCard({ ...formData, uid: contact.uid })
 
   const response = await authenticatedFetch(contact.href, {
