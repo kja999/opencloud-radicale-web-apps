@@ -49,11 +49,11 @@ export function parseCurrentUserPrincipal(xml: string): string | null {
     for (const item of items) {
       const prop = extractProp(item['d:propstat'])
       if (prop && prop['d:current-user-principal']) {
-        const principal = prop['d:current-user-principal']
+        const principal = prop['d:current-user-principal'] as Record<string, unknown> | undefined
         if (typeof principal === 'object' && principal?.['d:href']) {
-          return (principal as Record<string, unknown>)['d:href'] as string
+          return principal['d:href'] as string
         }
-        return principal as string
+        return String(principal)
       }
     }
     return null
@@ -72,11 +72,11 @@ export function parseAddressbookHomeSet(xml: string): string | null {
     for (const item of items) {
       const prop = extractProp(item['d:propstat'])
       if (prop && prop['ca:addressbook-home-set']) {
-        const homeSet = prop['ca:addressbook-home-set']
+        const homeSet = prop['ca:addressbook-home-set'] as Record<string, unknown> | undefined
         if (typeof homeSet === 'object' && homeSet?.['d:href']) {
-          return (homeSet as Record<string, unknown>)['d:href'] as string
+          return homeSet['d:href'] as string
         }
-        return homeSet as string
+        return String(homeSet)
       }
     }
     return null

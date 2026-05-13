@@ -134,7 +134,7 @@ export function addExceptionToICS(
 
     if (!vevent) return icsData
 
-    const recId = ICAL.Time.fromString(recurrenceId)
+    const recId = ICAL.Time.fromString(recurrenceId, { ical: 'UTC' })
     const exception = new ICAL.Component('VEVENT')
 
     if (formData) {
