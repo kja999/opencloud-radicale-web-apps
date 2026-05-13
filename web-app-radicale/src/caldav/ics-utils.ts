@@ -36,7 +36,7 @@ export function parseICS(icsData: string, href: string, etag: string, _range: Da
       if (rruleRaw && typeof rruleRaw === 'object') {
         const rrule = rruleRaw as Record<string, unknown>
         recRule = {
-          freq: (rrule.freq as string) as 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY',
+          freq: rrule.freq as string as 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY',
           interval: rrule.interval as number | undefined,
           until: rrule.until ? (rrule.until as { toJSDate(): Date }).toJSDate() : undefined,
           count: rrule.count as number | undefined,
