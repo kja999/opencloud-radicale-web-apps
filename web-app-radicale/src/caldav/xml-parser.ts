@@ -5,23 +5,24 @@ const parser = new XMLParser({
   attributeNamePrefix: '@_',
   textNodeName: '#text',
   parseAttributeValue: true,
-  trimValues: true
+  trimValues: true,
+  removeNSPrefix: true
 })
 
 interface PropfindResponse {
-  'd:multistatus'?: {
-    'd:response'?: PropfindResponseItem | PropfindResponseItem[]
+  multistatus?: {
+    response?: PropfindResponseItem | PropfindResponseItem[]
   }
 }
 
 interface PropfindResponseItem {
-  'd:href': string
-  'd:propstat'?:
+  href: string
+  propstat?:
     | {
-        'd:prop': Record<string, unknown>
+        prop: Record<string, unknown>
       }
     | {
-        'd:prop': Record<string, unknown>
+        prop: Record<string, unknown>
       }[]
 }
 
@@ -29,14 +30,14 @@ function extractProp(propstat: unknown): Record<string, unknown> | null {
   if (!propstat) return null
   if (Array.isArray(propstat)) {
     for (const p of propstat) {
-      if (p['d:prop']) {
-        return p['d:prop'] as Record<string, unknown>
+      if (p.prop) {
+        return p.prop as Record<string, unknown>
       }
     }
     return null
   }
-  if (typeof propstat === 'object' && 'd:prop' in propstat) {
-    return (propstat['d:prop'] as Record<string, unknown>) || null
+  if (typeof propstat === 'object' && 'prop' in propstat) {
+    return (propstat.prop as Record<string, unknown>) || null
   }
   return null
 }
@@ -44,22 +45,23 @@ function extractProp(propstat: unknown): Record<string, unknown> | null {
 export function parseCurrentUserPrincipal(xml: string): string | null {
   try {
     const result = parser.parse(xml) as PropfindResponse
-    const responses = result['d:multistatus']?.['d:response']
+    const responses = result.multistatus?.response
     if (!responses) return null
 
     const items = Array.isArray(responses) ? responses : [responses]
     for (const item of items) {
-      const prop = extractProp(item['d:propstat'])
-      if (prop && prop['d:current-user-principal']) {
-        const principal = prop['d:current-user-principal'] as Record<string, unknown> | undefined
-        if (typeof principal === 'object' && principal?.['d:href']) {
-          return principal['d:href'] as string
+      const prop = extractProp(item.propstat)
+      if (prop && prop['current-user-principal']) {
+        const principal = prop['current-user-principal'] as Record<string, unknown> | undefined
+        if (typeof principal === 'object' && principal?.href) {
+          return principal.href as string
         }
         return String(principal)
       }
     }
     return null
-  } catch {
+  } catch (e) {
+    console.error('[CalDAV] Parse error:', e)
     return null
   }
 }
@@ -67,16 +69,16 @@ export function parseCurrentUserPrincipal(xml: string): string | null {
 export function parseCalendarHomeSet(xml: string): string | null {
   try {
     const result = parser.parse(xml) as PropfindResponse
-    const responses = result['d:multistatus']?.['d:response']
+    const responses = result.multistatus?.response
     if (!responses) return null
 
     const items = Array.isArray(responses) ? responses : [responses]
     for (const item of items) {
-      const prop = extractProp(item['d:propstat'])
-      if (prop && prop['c:calendar-home-set']) {
-        const homeSet = prop['c:calendar-home-set'] as Record<string, unknown> | undefined
-        if (typeof homeSet === 'object' && homeSet?.['d:href']) {
-          return homeSet['d:href'] as string
+      const prop = extractProp(item.propstat)
+      if (prop && prop['calendar-home-set']) {
+        const homeSet = prop['calendar-home-set'] as Record<string, unknown> | undefined
+        if (typeof homeSet === 'object' && homeSet?.href) {
+          return homeSet.href as string
         }
         return String(homeSet)
       }
@@ -100,31 +102,31 @@ export function parseCalendars(xml: string): CalendarData[] {
 
   try {
     const result = parser.parse(xml) as PropfindResponse
-    const responses = result['d:multistatus']?.['d:response']
+    const responses = result.multistatus?.response
     if (!responses) return calendars
 
     const items = Array.isArray(responses) ? responses : [responses]
 
     for (const item of items) {
-      const href = item['d:href']
+      const href = item.href
       if (!href) continue
 
-      const prop = extractProp(item['d:propstat'])
+      const prop = extractProp(item.propstat)
       if (!prop) continue
 
-      const resourcetype = prop['d:resourcetype']
+      const resourcetype = prop.resourcetype
       let isCalendar = false
       if (resourcetype) {
         if (typeof resourcetype === 'object') {
-          isCalendar = 'c:calendar' in resourcetype || 'cal:calendar' in resourcetype
+          isCalendar = 'calendar' in resourcetype
         }
       }
       if (!isCalendar) continue
 
-      const displayName = prop['d:displayname'] as string | undefined
-      const color = prop['c:calendar-color'] as string | undefined
-      const ctag = prop['c:ctag'] as string | undefined
-      const description = prop['c:calendar-description'] as string | undefined
+      const displayName = prop.displayname as string | undefined
+      const color = prop['calendar-color'] as string | undefined
+      const ctag = prop.ctag as string | undefined
+      const description = prop['calendar-description'] as string | undefined
 
       calendars.push({
         href,
@@ -152,20 +154,20 @@ export function parseEvents(xml: string): EventData[] {
 
   try {
     const result = parser.parse(xml) as PropfindResponse
-    const responses = result['d:multistatus']?.['d:response']
+    const responses = result.multistatus?.response
     if (!responses) return events
 
     const items = Array.isArray(responses) ? responses : [responses]
 
     for (const item of items) {
-      const href = item['d:href']
+      const href = item.href
       if (!href) continue
 
-      const prop = extractProp(item['d:propstat'])
+      const prop = extractProp(item.propstat)
       if (!prop) continue
 
-      const etag = prop['d:getetag'] as string | undefined
-      const calendarData = prop['c:calendar-data'] as string | undefined
+      const etag = prop.getetag as string | undefined
+      const calendarData = prop['calendar-data'] as string | undefined
 
       if (calendarData) {
         events.push({

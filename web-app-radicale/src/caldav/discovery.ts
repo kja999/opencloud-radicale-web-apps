@@ -16,10 +16,6 @@ async function propfind(url: string, body: string, depth: '0' | '1' = '0'): Prom
     body
   })
 
-  console.log('[CalDAV] PROPFIND response:', url, response.status, response.headers.get('content-type'))
-  const text = await response.text()
-  console.log('[CalDAV] PROPFIND body (first 500 chars):', text.slice(0, 500))
-
   if (response.status === 401) {
     throw new AuthenticationError()
   }
@@ -30,7 +26,7 @@ async function propfind(url: string, body: string, depth: '0' | '1' = '0'): Prom
     throw new CalDAVError(`PROPFIND failed: ${response.statusText}`, response.status)
   }
 
-  return text
+  return response.text()
 }
 
 export async function discoverUserPrincipal(): Promise<string> {
