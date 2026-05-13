@@ -24,7 +24,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: web-app-radicale
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run linter
         working-directory: web-app-radicale
@@ -64,7 +64,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: web-app-radicale
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run tests with coverage
         working-directory: web-app-radicale
