@@ -5,23 +5,24 @@ const parser = new XMLParser({
   attributeNamePrefix: '@_',
   textNodeName: '#text',
   parseAttributeValue: true,
-  trimValues: true
+  trimValues: true,
+  removeNSPrefix: true
 })
 
 interface PropfindResponse {
-  'd:multistatus'?: {
-    'd:response'?: PropfindResponseItem | PropfindResponseItem[]
+  multistatus?: {
+    response?: PropfindResponseItem | PropfindResponseItem[]
   }
 }
 
 interface PropfindResponseItem {
-  'd:href': string
-  'd:propstat'?:
+  href: string
+  propstat?:
     | {
-        'd:prop': Record<string, unknown>
+        prop: Record<string, unknown>
       }
     | {
-        'd:prop': Record<string, unknown>
+        prop: Record<string, unknown>
       }[]
 }
 
@@ -29,14 +30,14 @@ function extractProp(propstat: unknown): Record<string, unknown> | null {
   if (!propstat) return null
   if (Array.isArray(propstat)) {
     for (const p of propstat) {
-      if (p['d:prop']) {
-        return p['d:prop'] as Record<string, unknown>
+      if (p['prop']) {
+        return p['prop'] as Record<string, unknown>
       }
     }
     return null
   }
-  if (typeof propstat === 'object' && 'd:prop' in propstat) {
-    return (propstat['d:prop'] as Record<string, unknown>) || null
+  if (typeof propstat === 'object' && 'prop' in propstat) {
+    return (propstat['prop'] as Record<string, unknown>) || null
   }
   return null
 }
@@ -44,16 +45,18 @@ function extractProp(propstat: unknown): Record<string, unknown> | null {
 export function parseCurrentUserPrincipal(xml: string): string | null {
   try {
     const result = parser.parse(xml) as PropfindResponse
-    const responses = result['d:multistatus']?.['d:response']
+    const responses = result['multistatus']?.['response']
     if (!responses) return null
 
     const items = Array.isArray(responses) ? responses : [responses]
     for (const item of items) {
-      const prop = extractProp(item['d:propstat'])
-      if (prop && prop['d:current-user-principal']) {
-        const principal = prop['d:current-user-principal'] as Record<string, unknown> | undefined
-        if (typeof principal === 'object' && principal?.['d:href']) {
-          return principal['d:href'] as string
+      const prop = extractProp(item['propstat'])
+      if (prop && prop['current-user-principal']) {
+        const principal = prop['current-user-principal'] as
+          | Record<string, unknown>
+          | undefined
+        if (typeof principal === 'object' && principal?.['href']) {
+          return principal['href'] as string
         }
         return String(principal)
       }
@@ -67,16 +70,18 @@ export function parseCurrentUserPrincipal(xml: string): string | null {
 export function parseAddressbookHomeSet(xml: string): string | null {
   try {
     const result = parser.parse(xml) as PropfindResponse
-    const responses = result['d:multistatus']?.['d:response']
+    const responses = result['multistatus']?.['response']
     if (!responses) return null
 
     const items = Array.isArray(responses) ? responses : [responses]
     for (const item of items) {
-      const prop = extractProp(item['d:propstat'])
-      if (prop && prop['ca:addressbook-home-set']) {
-        const homeSet = prop['ca:addressbook-home-set'] as Record<string, unknown> | undefined
-        if (typeof homeSet === 'object' && homeSet?.['d:href']) {
-          return homeSet['d:href'] as string
+      const prop = extractProp(item['propstat'])
+      if (prop && prop['addressbook-home-set']) {
+        const homeSet = prop['addressbook-home-set'] as
+          | Record<string, unknown>
+          | undefined
+        if (typeof homeSet === 'object' && homeSet?.['href']) {
+          return homeSet['href'] as string
         }
         return String(homeSet)
       }
@@ -100,31 +105,31 @@ export function parseAddressbooks(xml: string): AddressbookData[] {
 
   try {
     const result = parser.parse(xml) as PropfindResponse
-    const responses = result['d:multistatus']?.['d:response']
+    const responses = result['multistatus']?.['response']
     if (!responses) return addressbooks
 
     const items = Array.isArray(responses) ? responses : [responses]
 
     for (const item of items) {
-      const href = item['d:href']
+      const href = item['href']
       if (!href) continue
 
-      const prop = extractProp(item['d:propstat'])
+      const prop = extractProp(item['propstat'])
       if (!prop) continue
 
-      const resourcetype = prop['d:resourcetype']
+      const resourcetype = prop['resourcetype']
       let isAddressbook = false
       if (resourcetype) {
         if (typeof resourcetype === 'object') {
-          isAddressbook = 'ca:addressbook' in resourcetype || 'card:addressbook' in resourcetype
+          isAddressbook = 'addressbook' in resourcetype
         }
       }
       if (!isAddressbook) continue
 
-      const displayName = prop['d:displayname'] as string | undefined
-      const color = prop['ca:addressbook-color'] as string | undefined
-      const ctag = prop['c:ctag'] as string | undefined
-      const description = prop['ca:addressbook-description'] as string | undefined
+      const displayName = prop['displayname'] as string | undefined
+      const color = prop['addressbook-color'] as string | undefined
+      const ctag = prop['ctag'] as string | undefined
+      const description = prop['addressbook-description'] as string | undefined
 
       addressbooks.push({
         href,
@@ -152,20 +157,20 @@ export function parseContacts(xml: string): ContactData[] {
 
   try {
     const result = parser.parse(xml) as PropfindResponse
-    const responses = result['d:multistatus']?.['d:response']
+    const responses = result['multistatus']?.['response']
     if (!responses) return contacts
 
     const items = Array.isArray(responses) ? responses : [responses]
 
     for (const item of items) {
-      const href = item['d:href']
+      const href = item['href']
       if (!href) continue
 
-      const prop = extractProp(item['d:propstat'])
+      const prop = extractProp(item['propstat'])
       if (!prop) continue
 
-      const etag = prop['d:getetag'] as string | undefined
-      const vcardData = prop['ca:address-data'] as string | undefined
+      const etag = prop['getetag'] as string | undefined
+      const vcardData = prop['address-data'] as string | undefined
 
       if (vcardData) {
         contacts.push({
