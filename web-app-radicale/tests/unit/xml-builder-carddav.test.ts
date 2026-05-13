@@ -32,14 +32,14 @@ describe('xml-builder (carddav)', () => {
       expect(xml).toContain('<D:resourcetype')
       expect(xml).toContain('<CA:addressbook-description')
       expect(xml).toContain('<CA:addressbook-color')
-      expect(xml).toContain('<C:ctag')
+      expect(xml).toContain('<CS:getctag')
     })
   })
 
   describe('buildAddressbookQuery', () => {
     it('generates valid addressbook-query XML', () => {
       const xml = buildAddressbookQuery()
-      expect(xml).toContain('<D:addressbook-query')
+      expect(xml).toContain('<CA:addressbook-query')
       expect(xml).toContain('<D:getetag')
       expect(xml).toContain('<CA:address-data')
       expect(xml).toContain('<CA:filter')

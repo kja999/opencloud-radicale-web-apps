@@ -128,7 +128,7 @@ export function parseAddressbooks(xml: string): AddressbookData[] {
 
       const displayName = prop['displayname'] as string | undefined
       const color = prop['addressbook-color'] as string | undefined
-      const ctag = prop['ctag'] as string | undefined
+      const ctag = (prop['getctag'] || prop['ctag']) as string | undefined
       const description = prop['addressbook-description'] as string | undefined
 
       addressbooks.push({

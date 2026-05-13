@@ -18,24 +18,24 @@ export function buildPropfindAddressbookHome(): string {
 
 export function buildPropfindAddressbooks(): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
-<D:propfind xmlns:D="DAV:" xmlns:CA="urn:ietf:params:xml:ns:carddav">
+<D:propfind xmlns:D="DAV:" xmlns:CA="urn:ietf:params:xml:ns:carddav" xmlns:CS="http://calendarserver.org/ns/">
   <D:prop>
     <D:displayname />
     <D:resourcetype />
     <CA:addressbook-description />
     <CA:addressbook-color />
-    <C:ctag />
+    <CS:getctag />
   </D:prop>
 </D:propfind>`
 }
 
 export function buildAddressbookQuery(): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
-<D:addressbook-query xmlns:D="DAV:" xmlns:CA="urn:ietf:params:xml:ns:carddav">
+<CA:addressbook-query xmlns:D="DAV:" xmlns:CA="urn:ietf:params:xml:ns:carddav">
   <D:prop>
     <D:getetag />
     <CA:address-data />
   </D:prop>
   <CA:filter />
-</D:addressbook-query>`
+</CA:addressbook-query>`
 }
