@@ -30,18 +30,19 @@ export function parseICS(icsData: string, href: string, etag: string, _range: Da
         end = endDate.toJSDate()
       }
 
-      const rrule = event.recurrenceId ? undefined : (event as unknown as { rrule?: unknown }).rrule
+      const rruleRaw = event.recurrenceId ? undefined : (event as unknown as { rrule?: unknown }).rrule
       let recRule: RecurrenceRule | undefined
 
-      if (rrule) {
+      if (rruleRaw && typeof rruleRaw === 'object') {
+        const rrule = rruleRaw as Record<string, unknown>
         recRule = {
-          freq: rrule.freq as 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY',
-          interval: rrule.interval,
-          until: rrule.until ? rrule.until.toJSDate() : undefined,
-          count: rrule.count,
-          byDay: rrule.byDay,
-          byMonthDay: rrule.byMonthDay,
-          byMonth: rrule.byMonth
+          freq: (rrule.freq as string) as 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY',
+          interval: rrule.interval as number | undefined,
+          until: rrule.until ? (rrule.until as { toJSDate(): Date }).toJSDate() : undefined,
+          count: rrule.count as number | undefined,
+          byDay: rrule.byDay as string[] | undefined,
+          byMonthDay: rrule.byMonthDay as number[] | undefined,
+          byMonth: rrule.byMonth as number[] | undefined
         }
       }
 
@@ -57,7 +58,7 @@ export function parseICS(icsData: string, href: string, etag: string, _range: Da
         description,
         location,
         icsData,
-        isRecurring: !!rrule,
+        isRecurring: !!rruleRaw,
         rrule: recRule
       }
     })
