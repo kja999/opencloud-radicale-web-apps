@@ -155,7 +155,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { getCalDAVClient } from '../caldav/client'
-import type { Calendar, CalendarEvent } from '../types/calendar'
+import type { Calendar, CalendarEvent, EventFormData } from '../types/calendar'
 import { t as translate } from '../composables/useLanguage'
 import EventModal from '../components/calendar/EventModal.vue'
 
@@ -351,7 +351,7 @@ function closeEventModal() {
   selectedEvent.value = null
 }
 
-async function saveEvent(formData: any) {
+async function saveEvent(formData: EventFormData) {
   try {
     if (selectedEvent.value) {
       await client.updateEvent(selectedEvent.value, formData)

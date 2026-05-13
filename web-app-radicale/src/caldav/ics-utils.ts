@@ -6,7 +6,7 @@ export function parseICS(
   icsData: string,
   href: string,
   etag: string,
-  range: DateRange
+  _range: DateRange
 ): CalendarEvent[] {
   try {
     const jcalData = ICAL.parse(icsData)
@@ -35,7 +35,7 @@ export function parseICS(
         end = endDate.toJSDate()
       }
 
-      const rrule = event.recurrenceId ? undefined : (event as any).rrule
+      const rrule = event.recurrenceId ? undefined : (event as unknown as { rrule?: unknown }).rrule
       let recRule: RecurrenceRule | undefined
 
       if (rrule) {
@@ -79,9 +79,6 @@ export function generateICS(formData: EventFormData): string {
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH'
   ]
-
-  const startParams = formData.allDay ? { VALUE: 'DATE' } : {}
-  const endParams = formData.allDay ? { VALUE: 'DATE' } : {}
 
   if (formData.allDay) {
     const startStr = formatDateOnly(formData.start)
@@ -138,7 +135,6 @@ export function addExceptionToICS(
     const exception = new ICAL.Component('VEVENT')
 
     if (formData) {
-      const startParams = formData.allDay ? { VALUE: 'DATE' } : {}
       exception.addPropertyWithValue('dtstart', formData.allDay
         ? ICAL.Time.fromJSDate(formData.start, true)
         : ICAL.Time.fromJSDate(formData.start, false))

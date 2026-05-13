@@ -80,7 +80,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { getCardDAVClient } from '../carddav/client'
-import type { Addressbook, Contact } from '../types/contacts'
+import type { Addressbook, Contact, ContactFormData } from '../types/contacts'
 import { t as translate } from '../composables/useLanguage'
 import ContactModal from '../components/contacts/ContactModal.vue'
 
@@ -150,7 +150,7 @@ function closeContactModal() {
   selectedContact.value = null
 }
 
-async function saveContact(formData: any) {
+async function saveContact(formData: ContactFormData) {
   try {
     if (selectedContact.value) {
       await client.updateContact(selectedContact.value, formData)

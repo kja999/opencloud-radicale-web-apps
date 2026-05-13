@@ -50,7 +50,7 @@ export default defineWebApplication({
       }
     ]
 
-    const extensions = ({ applicationConfig }: ApplicationSetupOptions) => {
+    const extensions = ({ applicationConfig: _applicationConfig }: ApplicationSetupOptions) => {
       return computed<Extension[]>(() => {
         const menuItems: AppMenuItemExtension[] = [
           {

@@ -1,8 +1,6 @@
 import { ref } from 'vue'
 import { useUserStore } from '@opencloud-eu/web-pkg'
 
-type MessageFunction = () => string
-
 const messages: Record<string, Record<string, string>> = {
   en: {
     'Web Calendar': 'Calendar',
@@ -96,7 +94,7 @@ export function initLanguage(): void {
     if (userStore.user) {
       const user = userStore.user
       const info = 'value' in user ? user.value : user
-      if (info && (info as any).displayName) {
+      if (info && typeof info === 'object' && 'displayName' in info) {
         // Could check user preferences for language
       }
     }
