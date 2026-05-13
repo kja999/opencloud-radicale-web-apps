@@ -18,27 +18,32 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'pnpm'
 
       - name: Install pnpm
         run: npm install -g pnpm
 
       - name: Install dependencies
+        working-directory: web-app-radicale
         run: pnpm install --frozen-lockfile
 
       - name: Run linter
+        working-directory: web-app-radicale
         run: pnpm lint
 
       - name: Check formatting
+        working-directory: web-app-radicale
         run: pnpm format:check
 
       - name: Run type check
+        working-directory: web-app-radicale
         run: pnpm check:types
 
       - name: Run tests
+        working-directory: web-app-radicale
         run: pnpm test:unit:run
 
       - name: Build project
+        working-directory: web-app-radicale
         run: pnpm build
 
   coverage:
@@ -53,15 +58,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'pnpm'
 
       - name: Install pnpm
         run: npm install -g pnpm
 
       - name: Install dependencies
+        working-directory: web-app-radicale
         run: pnpm install --frozen-lockfile
 
       - name: Run tests with coverage
+        working-directory: web-app-radicale
         run: pnpm test:coverage
         continue-on-error: true
 
@@ -69,5 +75,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coverage/
+          path: web-app-radicale/coverage/
           retention-days: 7
