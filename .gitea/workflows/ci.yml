@@ -20,7 +20,7 @@ jobs:
           node-version: '22'
 
       - name: Install pnpm
-        run: npm install -g pnpm
+        run: npm install -g pnpm --force
 
       - name: Install dependencies
         working-directory: web-app-radicale
@@ -60,7 +60,7 @@ jobs:
           node-version: '22'
 
       - name: Install pnpm
-        run: npm install -g pnpm
+        run: npm install -g pnpm --force
 
       - name: Install dependencies
         working-directory: web-app-radicale
