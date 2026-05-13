@@ -20,6 +20,7 @@
     "prepare": "husky install"
   },
   "devDependencies": {
+    "@eslint/js": "^9.22.0",
     "@vitejs/plugin-vue": "^5.2.0",
     "@opencloud-eu/eslint-config": "^5.0.0",
     "@opencloud-eu/prettier-config": "^5.0.0",
