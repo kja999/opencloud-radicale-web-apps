@@ -101,6 +101,20 @@
                 {{ [addr.postcode, addr.city, addr.region].filter(Boolean).join(', ') }}
               </div>
               <div v-if="addr.country">{{ addr.country }}</div>
+              <div class="contact-detail-address-actions">
+                <button class="contact-detail-address-btn" @click="searchAddress(addr)" :title="t('Search address')">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="M21 21l-4.35-4.35" />
+                  </svg>
+                </button>
+                <button class="contact-detail-address-btn" @click="copyAddress(addr)" :title="t('Copy address')">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" />
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -121,6 +135,7 @@
 
 <script setup lang="ts">
 import type { Contact } from '../../types/contacts'
+import type { ContactAddress } from '../../types/contacts'
 import { t as translate } from '../../composables/useLanguage'
 
 const t = translate
@@ -142,6 +157,30 @@ function formatBirthday(bday: string): string {
   const day = bday.substring(6, 8)
   const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
   return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
+function getFullAddress(addr: ContactAddress): string {
+  const parts = [addr.street, addr.postcode, addr.city, addr.region, addr.country].filter(Boolean)
+  return parts.join(', ')
+}
+
+function searchAddress(addr: ContactAddress) {
+  const query = encodeURIComponent(getFullAddress(addr))
+  window.open(`https://www.google.com/maps/search/${query}`, '_blank')
+}
+
+async function copyAddress(addr: ContactAddress) {
+  const text = getFullAddress(addr)
+  try {
+    await navigator.clipboard.writeText(text)
+  } catch {
+    const textarea = document.createElement('textarea')
+    textarea.value = text
+    document.body.appendChild(textarea)
+    textarea.select()
+    document.execCommand('copy')
+    document.body.removeChild(textarea)
+  }
 }
 </script>
 
@@ -294,6 +333,29 @@ function formatBirthday(bday: string): string {
 
 .contact-detail-address:last-child {
   margin-bottom: 0;
+}
+
+.contact-detail-address-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.contact-detail-address-btn {
+  padding: 4px 8px;
+  background: var(--oc-role-surface-container-low, #f5f7f8);
+  border: 1px solid var(--oc-role-outline-variant, #bfc8cc);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--oc-role-on-surface-variant, #40484c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.contact-detail-address-btn:hover {
+  background: var(--oc-role-surface-container-high, #e8eaec);
+  color: var(--oc-role-primary, #00677f);
 }
 
 .contact-detail-note {
