@@ -25,7 +25,7 @@
             <div class="contact-info">
               <div class="contact-name">{{ contact.fn }}</div>
               <div v-if="contact.organization" class="contact-org">{{ contact.organization }}</div>
-              <div v-if="contact.email?.length" class="contact-email">{{ contact.email[0] }}</div>
+              <div v-if="contact.email?.length" class="contact-email">{{ contact.email[0].value }}</div>
             </div>
           </div>
         </div>
