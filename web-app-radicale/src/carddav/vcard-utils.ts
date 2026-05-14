@@ -30,6 +30,7 @@ export function parseVCard(vcardData: string, href: string, etag: string): Conta
     }
 
     let fn = ''
+    let nickname = ''
     const email: LabeledValue[] = []
     const tel: LabeledValue[] = []
     const address: ContactAddress[] = []
@@ -58,6 +59,9 @@ export function parseVCard(vcardData: string, href: string, etag: string): Conta
           break
         case 'N':
           nValue = rawValue
+          break
+        case 'NICKNAME':
+          nickname = value
           break
         case 'EMAIL': {
           const label = extractType(keyPart, 'EMAIL')
@@ -106,6 +110,16 @@ export function parseVCard(vcardData: string, href: string, etag: string): Conta
       const lastName = parts[0] || ''
       const firstName = parts[1] || ''
       fn = [firstName, lastName].filter(p => p.trim()).join(' ') || lastName
+    }
+
+    if (!fn && nickname) {
+      fn = nickname
+    }
+
+    if (!fn && email.length > 0) {
+      const firstEmail = email[0].value
+      const atIndex = firstEmail.indexOf('@')
+      fn = atIndex > 0 ? firstEmail.substring(0, atIndex) : firstEmail
     }
 
     if (!fn) {
