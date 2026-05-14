@@ -62,4 +62,12 @@ function formatTime(date: Date): string {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+@media (max-width: 768px) {
+  .event-chip {
+    font-size: 0.65em;
+    padding: 1px 3px;
+    margin-bottom: 1px;
+  }
+}
 </style>

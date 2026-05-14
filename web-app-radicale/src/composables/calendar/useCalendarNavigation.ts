@@ -1,10 +1,40 @@
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 export type CalendarViewType = 'year' | 'month' | 'week' | '4weeks' | 'day' | 'schedule'
 
+function isMobile(): boolean {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia('(max-width: 768px)').matches
+}
+
 export function useCalendarNavigation() {
-  const currentView = ref<CalendarViewType>('month')
+  const currentView = ref<CalendarViewType>(isMobile() ? 'schedule' : 'month')
   const currentDate = ref(new Date())
+
+  function updateViewForScreenSize() {
+    if (isMobile() && currentView.value === 'month') {
+      currentView.value = 'schedule'
+    }
+  }
+
+  let resizeTimeout: ReturnType<typeof setTimeout> | null = null
+  function handleResize() {
+    if (resizeTimeout) clearTimeout(resizeTimeout)
+    resizeTimeout = setTimeout(updateViewForScreenSize, 100)
+  }
+
+  onMounted(() => {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', handleResize)
+    }
+  })
+
+  onUnmounted(() => {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', handleResize)
+    }
+    if (resizeTimeout) clearTimeout(resizeTimeout)
+  })
 
   const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 

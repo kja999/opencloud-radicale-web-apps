@@ -74,6 +74,7 @@ defineEmits<{
   padding: 4px;
   border-right: 1px solid var(--oc-role-outline-variant, #bfc8cc);
   border-bottom: 1px solid var(--oc-role-outline-variant, #bfc8cc);
+  overflow: hidden;
 }
 .month-cell.other-month {
   background: var(--oc-role-surface-container, #f6f8fa);
@@ -95,5 +96,21 @@ defineEmits<{
 .more-events {
   font-size: 0.7em;
   color: var(--oc-role-on-surface-variant, #40484c);
+}
+
+@media (max-width: 768px) {
+  .month-header-cell {
+    padding: 4px;
+    font-size: 0.65em;
+  }
+  .month-cell {
+    min-height: 60px;
+    padding: 2px;
+  }
+  .day-num {
+    font-size: 0.7em;
+    width: 20px;
+    height: 20px;
+  }
 }
 </style>
