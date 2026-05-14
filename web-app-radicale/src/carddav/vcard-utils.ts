@@ -33,6 +33,11 @@ export function parseVCard(vcardData: string, href: string, etag: string): Conta
     for (const line of unfoldedLines) {
       if (!line.trim()) continue
 
+      // Debug: log all lines containing BDAY
+      if (line.toUpperCase().includes('BDAY')) {
+        console.log('[parseVCard] BDAY line found:', line)
+      }
+
       const colonIndex = line.indexOf(':')
       if (colonIndex === -1) continue
 
@@ -79,11 +84,16 @@ export function parseVCard(vcardData: string, href: string, etag: string): Conta
           break
         case 'BDAY':
           birthday = value
+          console.log('[parseVCard] BDAY matched:', rawValue, '-> parsed as:', value)
           break
         case 'UID':
           uid = value
           break
       }
+    }
+
+    if (birthday) {
+      console.log('[parseVCard] Final birthday value:', birthday, 'for contact:', fn)
     }
 
     if (!fn && nValue) {
