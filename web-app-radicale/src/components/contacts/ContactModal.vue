@@ -144,6 +144,16 @@ const emit = defineEmits<{
 
 const emptyAddress = (): ContactAddress => ({ street: '', city: '', region: '', postcode: '', country: '' })
 
+function formatDateForInput(bday: string): string {
+  if (!bday || bday.length !== 8) return ''
+  return `${bday.substring(0, 4)}-${bday.substring(4, 6)}-${bday.substring(6, 8)}`
+}
+
+function formatDateForSave(bday: string): string {
+  if (!bday) return ''
+  return bday.replace(/-/g, '')
+}
+
 const form = ref({
   fn: '',
   email: [''],
@@ -166,7 +176,7 @@ watch(
         address: c.address?.length ? c.address.map(a => ({ ...a })) : [emptyAddress()],
         organization: c.organization || '',
         title: c.title || '',
-        birthday: c.birthday || '',
+        birthday: formatDateForInput(c.birthday || ''),
         note: c.note || ''
       }
     } else {
@@ -230,7 +240,7 @@ function save() {
     address: address.length ? address : undefined,
     organization: form.value.organization || undefined,
     title: form.value.title || undefined,
-    birthday: form.value.birthday || undefined,
+    birthday: formatDateForSave(form.value.birthday) || undefined,
     note: form.value.note || undefined,
     addressbookHref: props.addressbookHref
   })

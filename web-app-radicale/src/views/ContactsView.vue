@@ -26,7 +26,6 @@
               <div class="contact-name">{{ contact.fn }}</div>
               <div v-if="contact.organization" class="contact-org">{{ contact.organization }}</div>
               <div v-if="contact.email?.length" class="contact-email">{{ contact.email[0] }}</div>
-              <div v-if="contact.birthday" class="contact-birthday">{{ formatBirthday(contact.birthday) }}</div>
             </div>
           </div>
         </div>
@@ -88,15 +87,6 @@ function getContactColor(contact: Contact): string {
   const href = getAddressbookHref(contact)
   const ab = addressbooks.value.find(a => a.href === href)
   return ab?.color || '#e74c3c'
-}
-
-function formatBirthday(bday: string): string {
-  if (!bday || bday.length !== 8) return bday
-  const year = bday.substring(0, 4)
-  const month = bday.substring(4, 6)
-  const day = bday.substring(6, 8)
-  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
-  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
 async function loadData() {
@@ -289,11 +279,6 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.contact-birthday {
-  font-size: 0.8em;
-  color: var(--oc-role-primary, #00677f);
-  margin-top: 4px;
 }
 .contacts-save-error {
   display: flex;
