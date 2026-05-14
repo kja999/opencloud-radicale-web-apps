@@ -20,7 +20,7 @@
           </div>
           <div v-for="contact in allContacts" :key="contact.uid" class="contact-card" @click="viewContact(contact)">
             <div class="contact-avatar" :style="{ backgroundColor: getContactColor(contact) }">
-              {{ contact.fn.charAt(0).toUpperCase() }}
+              {{ getInitials(contact.fn) }}
             </div>
             <div class="contact-info">
               <div class="contact-name">{{ contact.fn }}</div>
@@ -94,9 +94,37 @@ function getAddressbookHref(contact: Contact): string {
 }
 
 function getContactColor(contact: Contact): string {
-  const href = getAddressbookHref(contact)
-  const ab = addressbooks.value.find(a => a.href === href)
-  return ab?.color || '#e74c3c'
+  const colors = [
+    '#e74c3c',
+    '#c0392b',
+    '#e67e22',
+    '#d35400',
+    '#f39c12',
+    '#f1c40f',
+    '#2ecc71',
+    '#27ae60',
+    '#16a085',
+    '#1abc9c',
+    '#3498db',
+    '#2980b9',
+    '#9b59b6',
+    '#8e44ad',
+    '#34495e',
+    '#2c3e50'
+  ]
+  let hash = 0
+  for (let i = 0; i < contact.fn.length; i++) {
+    hash = contact.fn.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return colors[Math.abs(hash) % colors.length]
+}
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length === 1) {
+    return parts[0].charAt(0).toUpperCase()
+  }
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
 }
 
 async function loadData() {
@@ -272,9 +300,10 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 1.1em;
+  font-size: 1em;
   font-weight: 600;
   flex-shrink: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 .contact-info {
   min-width: 0;

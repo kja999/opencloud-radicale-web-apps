@@ -134,6 +134,7 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, onUnmounted } from 'vue'
 import type { Contact } from '../../types/contacts'
 import type { ContactAddress } from '../../types/contacts'
 import { t as translate } from '../../composables/useLanguage'
@@ -145,10 +146,24 @@ defineProps<{
   color: string
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   close: []
   edit: []
 }>()
+
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    emit('close')
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown)
+})
 
 function formatBirthday(bday: string): string {
   if (!bday || bday.length !== 8) return bday
