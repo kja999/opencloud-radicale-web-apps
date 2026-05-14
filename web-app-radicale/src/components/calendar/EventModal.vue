@@ -270,6 +270,15 @@ watch(
   { immediate: true }
 )
 
+watch(
+  () => form.value.startDate,
+  newStartDate => {
+    if (newStartDate && form.value.endDate) {
+      form.value.endDate = newStartDate
+    }
+  }
+)
+
 function formatDateInput(date: Date): string {
   const y = date.getFullYear()
   const m = String(date.getMonth() + 1).padStart(2, '0')
