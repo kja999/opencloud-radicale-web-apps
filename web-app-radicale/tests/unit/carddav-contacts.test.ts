@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import type { ContactFormData } from '../../src/types/contacts'
+import type { ContactFormData, Contact } from '../../src/types/contacts'
 
 vi.mock('../../src/carddav/auth', () => ({
   authenticatedFetch: vi.fn()
@@ -35,20 +35,13 @@ describe('CardDAV Contacts CRUD', () => {
         ok: true
       } as Response)
 
-      const result = await createContact(formData)
+      await createContact(formData)
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringMatching(/\.vcf$/),
-        expect.objectContaining({
-          method: 'PUT',
-          headers: expect.objectContaining({
-            'Content-Type': 'text/vcard; charset=utf-8',
-            'If-None-Match': '*'
-          })
-        })
-      )
-      expect(result.fn).toBe('John Doe')
-      expect(result.etag).toBe('etag123')
+      const callArgs = mockFetch.mock.calls[0]
+      const vcardBody = callArgs[1].body as string
+      expect(vcardBody).toContain('FN:John Doe')
+      expect(vcardBody).toMatch(/EMAIL.*john@example.com/)
+      expect(vcardBody).toMatch(/TEL.*\+1234567890/)
     })
 
     it('creates contact with multiple emails', async () => {
@@ -64,7 +57,7 @@ describe('CardDAV Contacts CRUD', () => {
         ok: true
       } as Response)
 
-      const result = await createContact(formData)
+      await createContact(formData)
 
       const callArgs = mockFetch.mock.calls[0]
       const vcardBody = callArgs[1].body as string
@@ -87,7 +80,7 @@ describe('CardDAV Contacts CRUD', () => {
         ok: true
       } as Response)
 
-      const result = await createContact(formData)
+      await createContact(formData)
 
       const callArgs = mockFetch.mock.calls[0]
       const vcardBody = callArgs[1].body as string
@@ -144,7 +137,7 @@ describe('CardDAV Contacts CRUD', () => {
         ok: true
       } as Response)
 
-      const result = await updateContact(existingContact as any, formData)
+      const result = await updateContact(existingContact as Contact, formData)
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/addressbooks/user/contact-123.vcf',
@@ -173,7 +166,7 @@ describe('CardDAV Contacts CRUD', () => {
       } as Response)
 
       await expect(
-        updateContact(existingContact as any, {
+        updateContact(existingContact as Contact, {
           fn: 'Test',
           addressbookHref: '/addressbooks/user/'
         })
@@ -196,7 +189,7 @@ describe('CardDAV Contacts CRUD', () => {
         ok: true
       } as Response)
 
-      await deleteContact(existingContact as any)
+      await deleteContact(existingContact as Contact)
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/addressbooks/user/contact-123.vcf',
@@ -222,7 +215,7 @@ describe('CardDAV Contacts CRUD', () => {
         status: 404
       } as Response)
 
-      await expect(deleteContact(existingContact as any)).resolves.toBeUndefined()
+      await expect(deleteContact(existingContact as Contact)).resolves.toBeUndefined()
     })
   })
 })

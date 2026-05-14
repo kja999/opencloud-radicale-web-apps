@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import type { EventFormData } from '../../src/types/calendar'
+import type { EventFormData, CalendarEvent } from '../../src/types/calendar'
 
 vi.mock('../../src/caldav/auth', () => ({
   authenticatedFetch: vi.fn()
@@ -13,7 +13,7 @@ import {
   updateEventOccurrence,
   updateEventSeries
 } from '../../src/caldav/events'
-import { CalDAVError, AuthenticationError, NotFoundError, ConflictError } from '../../src/caldav/errors'
+import { AuthenticationError, NotFoundError, ConflictError } from '../../src/caldav/errors'
 
 const mockFetch = authenticatedFetch as unknown as ReturnType<typeof vi.fn>
 
@@ -125,7 +125,8 @@ describe('CalDAV Events CRUD', () => {
         summary: 'Old Title',
         start: new Date('2024-01-15T10:00:00'),
         end: new Date('2024-01-15T11:00:00'),
-        allDay: false
+        allDay: false,
+        isRecurring: false
       }
 
       const formData: EventFormData = {
@@ -142,7 +143,7 @@ describe('CalDAV Events CRUD', () => {
         ok: true
       } as Response)
 
-      const result = await updateEvent(existingEvent as any, formData)
+      const result = await updateEvent(existingEvent as CalendarEvent, formData)
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/cal/event-123.ics',
@@ -166,7 +167,8 @@ describe('CalDAV Events CRUD', () => {
         summary: 'Test',
         start: new Date(),
         end: new Date(),
-        allDay: false
+        allDay: false,
+        isRecurring: false
       }
 
       mockFetch.mockResolvedValueOnce({
@@ -174,7 +176,7 @@ describe('CalDAV Events CRUD', () => {
       } as Response)
 
       await expect(
-        updateEvent(existingEvent as any, {
+        updateEvent(existingEvent as CalendarEvent, {
           summary: 'Test',
           start: new Date(),
           end: new Date(),
@@ -193,7 +195,8 @@ describe('CalDAV Events CRUD', () => {
         summary: 'Test',
         start: new Date(),
         end: new Date(),
-        allDay: false
+        allDay: false,
+        isRecurring: false
       }
 
       mockFetch.mockResolvedValueOnce({
@@ -201,7 +204,7 @@ describe('CalDAV Events CRUD', () => {
       } as Response)
 
       await expect(
-        updateEvent(existingEvent as any, {
+        updateEvent(existingEvent as CalendarEvent, {
           summary: 'Test',
           start: new Date(),
           end: new Date(),
@@ -222,7 +225,8 @@ describe('CalDAV Events CRUD', () => {
         summary: 'Test',
         start: new Date(),
         end: new Date(),
-        allDay: false
+        allDay: false,
+        isRecurring: false
       }
 
       mockFetch.mockResolvedValueOnce({
@@ -230,7 +234,7 @@ describe('CalDAV Events CRUD', () => {
         ok: true
       } as Response)
 
-      await deleteEvent(existingEvent as any)
+      await deleteEvent(existingEvent as CalendarEvent)
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/cal/event-123.ics',
@@ -252,14 +256,15 @@ describe('CalDAV Events CRUD', () => {
         summary: 'Test',
         start: new Date(),
         end: new Date(),
-        allDay: false
+        allDay: false,
+        isRecurring: false
       }
 
       mockFetch.mockResolvedValueOnce({
         status: 404
       } as Response)
 
-      await expect(deleteEvent(existingEvent as any)).resolves.toBeUndefined()
+      await expect(deleteEvent(existingEvent as CalendarEvent)).resolves.toBeUndefined()
     })
   })
 
@@ -274,6 +279,7 @@ describe('CalDAV Events CRUD', () => {
         start: new Date('2024-01-15T10:00:00'),
         end: new Date('2024-01-15T11:00:00'),
         allDay: false,
+        isRecurring: true,
         icsData:
           'BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:event-123\r\nRRULE:FREQ=WEEKLY\r\nDTSTART:20240115T100000\r\nDTEND:20240115T110000\r\nSUMMARY:Weekly Event\r\nEND:VEVENT\r\nEND:VCALENDAR'
       }
@@ -291,7 +297,7 @@ describe('CalDAV Events CRUD', () => {
         ok: true
       } as Response)
 
-      await updateEventOccurrence(existingEvent as any, '20240122T100000', formData)
+      await updateEventOccurrence(existingEvent as CalendarEvent, '20240122T100000', formData)
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/cal/event-123.ics',
@@ -316,6 +322,7 @@ describe('CalDAV Events CRUD', () => {
         start: new Date('2024-01-15T10:00:00'),
         end: new Date('2024-01-15T11:00:00'),
         allDay: false,
+        isRecurring: true,
         icsData: 'BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:event-123\r\nRRULE:FREQ=WEEKLY\r\nEND:VEVENT\r\nEND:VCALENDAR'
       }
 
@@ -332,7 +339,7 @@ describe('CalDAV Events CRUD', () => {
         ok: true
       } as Response)
 
-      await updateEventSeries(existingEvent as any, formData)
+      await updateEventSeries(existingEvent as CalendarEvent, formData)
 
       const callArgs = mockFetch.mock.calls[0]
       const icsBody = callArgs[1].body as string

@@ -96,7 +96,8 @@ Before any commit or PR, verify:
     Full CI check: Gites is used as a repo, build applicable rules here.
 
 Local PC:
-    This PC is Fedora Immutable OS. For execution, use podman exec on the toolbox container.
+    This PC is Fedora Immutable OS. For execution, use podman exec on the toolbox container:
+        podman exec -w <working folder> <toolbox name> <command>
 
     
 🤖 Agent Self-Reminder
