@@ -81,7 +81,7 @@ const allContacts = computed(() => {
         c =>
           c.fn.toLowerCase().includes(query) ||
           c.organization?.toLowerCase().includes(query) ||
-          c.email?.some(e => e.toLowerCase().includes(query))
+          c.email?.some(e => e.value.toLowerCase().includes(query))
       )
     : contacts.value
   return filtered.toSorted((a, b) => a.fn.localeCompare(b.fn))
