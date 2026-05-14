@@ -3,10 +3,10 @@ import { useUserStore } from '@opencloud-eu/web-pkg'
 
 const messages: Record<string, Record<string, string>> = {
   en: {
-    'Web Calendar': 'Calendar',
-    'Web Contacts': 'Contacts',
-    Calendar: 'Calendar',
-    Contacts: 'Contacts',
+    'Web Calendar': 'My Calendar',
+    'Web Contacts': 'My Contacts',
+    Calendar: 'My Calendar',
+    Contacts: 'My Contacts',
     Today: 'Today',
     Month: 'Month',
     Week: 'Week',
@@ -62,10 +62,10 @@ const messages: Record<string, Record<string, string>> = {
     'All events in series': 'All events in series'
   },
   de: {
-    'Web Calendar': 'Kalender',
-    'Web Contacts': 'Kontakte',
-    Calendar: 'Kalender',
-    Contacts: 'Kontakte',
+    'Web Calendar': 'Mein Kalender',
+    'Web Contacts': 'Meine Kontakte',
+    Calendar: 'Mein Kalender',
+    Contacts: 'Meine Kontakte',
     Today: 'Heute',
     Month: 'Monat',
     Week: 'Woche',
