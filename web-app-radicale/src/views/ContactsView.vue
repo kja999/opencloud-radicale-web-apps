@@ -18,7 +18,7 @@
           <div class="contacts-count">
             {{ t('Showing') }} {{ allContacts.length }} {{ t('of') }} {{ contacts.length }} {{ t('contacts') }}
           </div>
-          <div v-for="contact in allContacts" :key="contact.uid" class="contact-card" @click="openContact(contact)">
+          <div v-for="contact in allContacts" :key="contact.uid" class="contact-card" @click="viewContact(contact)">
             <div class="contact-avatar" :style="{ backgroundColor: getContactColor(contact) }">
               {{ contact.fn.charAt(0).toUpperCase() }}
             </div>
@@ -31,6 +31,14 @@
         </div>
       </main>
     </div>
+
+    <ContactDetail
+      v-if="viewingContact"
+      :contact="viewingContact"
+      :color="getContactColor(viewingContact)"
+      @close="viewingContact = null"
+      @edit="openEditModal"
+    />
 
     <ContactModal
       v-if="showContactModal"
@@ -49,6 +57,7 @@ import { getCardDAVClient } from '../carddav/client'
 import type { Addressbook, Contact, ContactFormData } from '../types/contacts'
 import { t as translate } from '../composables/useLanguage'
 import ContactModal from '../components/contacts/ContactModal.vue'
+import ContactDetail from '../components/contacts/ContactDetail.vue'
 
 const t = translate
 
@@ -62,6 +71,7 @@ const saveError = ref<string | null>(null)
 const showContactModal = ref(false)
 const selectedContact = ref<Contact | null>(null)
 const selectedAddressbook = ref('')
+const viewingContact = ref<Contact | null>(null)
 const searchQuery = ref('')
 
 const allContacts = computed(() => {
@@ -104,20 +114,29 @@ async function loadData() {
 }
 
 function openNewContact() {
+  viewingContact.value = null
   selectedContact.value = null
   selectedAddressbook.value = addressbooks.value[0]?.href || ''
   showContactModal.value = true
 }
 
-function openContact(contact: Contact) {
-  selectedContact.value = contact
-  selectedAddressbook.value = getAddressbookHref(contact)
-  showContactModal.value = true
+function viewContact(contact: Contact) {
+  viewingContact.value = contact
+}
+
+function openEditModal() {
+  if (viewingContact.value) {
+    selectedContact.value = viewingContact.value
+    selectedAddressbook.value = getAddressbookHref(viewingContact.value)
+    viewingContact.value = null
+    showContactModal.value = true
+  }
 }
 
 function closeContactModal() {
   showContactModal.value = false
   selectedContact.value = null
+  viewingContact.value = null
 }
 
 async function saveContact(formData: ContactFormData) {
@@ -128,6 +147,7 @@ async function saveContact(formData: ContactFormData) {
       await client.createContact({ ...formData, addressbookHref: selectedAddressbook.value })
     }
     await loadData()
+    viewingContact.value = null
     closeContactModal()
   } catch (e) {
     saveError.value = e instanceof Error ? e.message : String(e)
@@ -139,6 +159,7 @@ async function deleteContact(contact: Contact) {
   try {
     await client.deleteContact(contact)
     await loadData()
+    viewingContact.value = null
     closeContactModal()
   } catch (e) {
     saveError.value = e instanceof Error ? e.message : String(e)
