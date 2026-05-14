@@ -32,6 +32,8 @@ export async function fetchContacts(addressbookHref: string): Promise<Contact[]>
   const xml = await report(addressbookHref, buildAddressbookQuery())
   const contactData = parseContacts(xml)
 
+  console.log('[CardDAV] Raw contacts from XML:', contactData.length)
+
   const contacts: Contact[] = []
   for (const data of contactData) {
     const parsed = parseVCard(data.vcardData, data.href, data.etag)
@@ -40,13 +42,17 @@ export async function fetchContacts(addressbookHref: string): Promise<Contact[]>
     }
   }
 
+  console.log('[CardDAV] Parsed contacts:', contacts.length)
   return contacts
 }
 
-export async function createContact(formData: ContactFormData): Promise<Contact> {
+export async function createContact(formData: ContactFormData, retryCount = 0): Promise<Contact> {
   const uid = generateUID()
   const vcardData = generateVCard({ ...formData, uid })
   const contactHref = `${formData.addressbookHref}${uid}.vcf`
+
+  console.log('[CardDAV] Creating contact at:', contactHref)
+  console.log('[CardDAV] vCard data:', vcardData)
 
   const response = await authenticatedFetch(contactHref, {
     method: 'PUT',
@@ -57,14 +63,32 @@ export async function createContact(formData: ContactFormData): Promise<Contact>
     body: vcardData
   })
 
+  console.log('[CardDAV] Create contact response:', response.status, response.statusText)
+
   if (response.status === 401) {
     throw new AuthenticationError()
   }
   if (response.status === 412) {
     throw new ConflictError('Contact already exists')
   }
+  if (response.status === 409) {
+    const body = await response.text().catch(() => '')
+    console.log('[CardDAV] UID conflict, retrying (attempt', retryCount + 1, '):', body)
+    if (retryCount < 3) {
+      return createContact(formData, retryCount + 1)
+    }
+    throw new CardDAVError(
+      `Failed to create contact: UID conflict after retries (${response.status}): ${response.statusText || body}`,
+      response.status
+    )
+  }
   if (!response.ok && response.status !== 201) {
-    throw new CardDAVError(`Failed to create contact: ${response.statusText}`, response.status)
+    const body = await response.text().catch(() => '')
+    console.log('[CardDAV] Create contact error body:', body)
+    throw new CardDAVError(
+      `Failed to create contact (HTTP ${response.status}): ${response.statusText || body}`,
+      response.status
+    )
   }
 
   const etag = response.headers.get('ETag')?.replace(/"/g, '') || ''
@@ -88,6 +112,9 @@ export async function createContact(formData: ContactFormData): Promise<Contact>
 export async function updateContact(contact: Contact, formData: ContactFormData): Promise<Contact> {
   const vcardData = generateVCard({ ...formData, uid: contact.uid })
 
+  console.log('[CardDAV] Updating contact at:', contact.href)
+  console.log('[CardDAV] vCard data:', vcardData)
+
   const response = await authenticatedFetch(contact.href, {
     method: 'PUT',
     headers: {
@@ -97,8 +124,24 @@ export async function updateContact(contact: Contact, formData: ContactFormData)
     body: vcardData
   })
 
+  console.log('[CardDAV] Update contact response:', response.status, response.statusText)
+
   if (response.status === 401) {
     throw new AuthenticationError()
+  }
+  if (response.status === 404) {
+    throw new NotFoundError('Contact not found')
+  }
+  if (response.status === 412) {
+    throw new ConflictError('Contact was modified by another client', contact.etag)
+  }
+  if (!response.ok && response.status !== 204) {
+    const body = await response.text().catch(() => '')
+    console.log('[CardDAV] Update contact error body:', body)
+    throw new CardDAVError(
+      `Failed to update contact (HTTP ${response.status}): ${response.statusText || body}`,
+      response.status
+    )
   }
   if (response.status === 404) {
     throw new NotFoundError('Contact not found')

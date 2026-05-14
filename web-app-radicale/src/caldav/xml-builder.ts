@@ -51,5 +51,3 @@ export function buildCalendarQuery(start: Date, end: Date): string {
   </C:filter>
 </C:calendar-query>`
 }
-
-

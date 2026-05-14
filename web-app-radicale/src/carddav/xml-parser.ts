@@ -1,60 +1,18 @@
-import { XMLParser } from 'fast-xml-parser'
+import { parser, extractProp, type PropfindResponse, type PropfindResponseItem } from '../lib/xml-utils'
 
-const parser = new XMLParser({
-  ignoreAttributes: false,
-  attributeNamePrefix: '@_',
-  textNodeName: '#text',
-  parseAttributeValue: true,
-  trimValues: true,
-  removeNSPrefix: true
-})
-
-interface PropfindResponse {
-  multistatus?: {
-    response?: PropfindResponseItem | PropfindResponseItem[]
-  }
-}
-
-interface PropfindResponseItem {
-  href: string
-  propstat?:
-    | {
-        prop: Record<string, unknown>
-      }
-    | {
-        prop: Record<string, unknown>
-      }[]
-}
-
-function extractProp(propstat: unknown): Record<string, unknown> | null {
-  if (!propstat) return null
-  if (Array.isArray(propstat)) {
-    for (const p of propstat) {
-      if (p['prop']) {
-        return p['prop'] as Record<string, unknown>
-      }
-    }
-    return null
-  }
-  if (typeof propstat === 'object' && 'prop' in propstat) {
-    return (propstat['prop'] as Record<string, unknown>) || null
-  }
-  return null
-}
+export type { PropfindResponse, PropfindResponseItem }
 
 export function parseCurrentUserPrincipal(xml: string): string | null {
   try {
     const result = parser.parse(xml) as PropfindResponse
-    const responses = result['multistatus']?.['response']
+    const responses = result.multistatus?.response
     if (!responses) return null
 
     const items = Array.isArray(responses) ? responses : [responses]
     for (const item of items) {
       const prop = extractProp(item['propstat'])
       if (prop && prop['current-user-principal']) {
-        const principal = prop['current-user-principal'] as
-          | Record<string, unknown>
-          | undefined
+        const principal = prop['current-user-principal'] as Record<string, unknown> | undefined
         if (typeof principal === 'object' && principal?.['href']) {
           return principal['href'] as string
         }
@@ -77,9 +35,7 @@ export function parseAddressbookHomeSet(xml: string): string | null {
     for (const item of items) {
       const prop = extractProp(item['propstat'])
       if (prop && prop['addressbook-home-set']) {
-        const homeSet = prop['addressbook-home-set'] as
-          | Record<string, unknown>
-          | undefined
+        const homeSet = prop['addressbook-home-set'] as Record<string, unknown> | undefined
         if (typeof homeSet === 'object' && homeSet?.['href']) {
           return homeSet['href'] as string
         }

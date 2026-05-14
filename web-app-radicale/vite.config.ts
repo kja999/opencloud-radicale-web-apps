@@ -17,14 +17,10 @@ function stripSharedVersions(): Plugin {
       for (const [fileName, chunk] of Object.entries(bundle)) {
         if (
           chunk.type === 'chunk' &&
-          (fileName.includes('localSharedImportMap') ||
-            fileName.includes('SharedImportMap'))
+          (fileName.includes('localSharedImportMap') || fileName.includes('SharedImportMap'))
         ) {
           // Replace version:"X.Y.Z" with version:void 0
-          chunk.code = chunk.code.replace(
-            /version:"[^"]+"/g,
-            'version:void 0'
-          )
+          chunk.code = chunk.code.replace(/version:"[^"]+"/g, 'version:void 0')
         }
       }
     }

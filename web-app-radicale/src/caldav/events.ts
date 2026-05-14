@@ -47,10 +47,13 @@ export async function fetchEvents(calendarHref: string, range: DateRange): Promi
   return events
 }
 
-export async function createEvent(formData: EventFormData): Promise<CalendarEvent> {
+export async function createEvent(formData: EventFormData, retryCount = 0): Promise<CalendarEvent> {
   const uid = generateUID()
   const icsData = generateICS({ ...formData, uid })
   const eventHref = `${formData.calendarHref}${uid}.ics`
+
+  console.log('[CalDAV] Creating event at:', eventHref)
+  console.log('[CalDAV] ICS data:', icsData)
 
   const response = await authenticatedFetch(eventHref, {
     method: 'PUT',
@@ -61,14 +64,32 @@ export async function createEvent(formData: EventFormData): Promise<CalendarEven
     body: icsData
   })
 
+  console.log('[CalDAV] Create event response:', response.status, response.statusText)
+
   if (response.status === 401) {
     throw new AuthenticationError()
   }
   if (response.status === 412) {
     throw new ConflictError('Event already exists')
   }
+  if (response.status === 409) {
+    const body = await response.text().catch(() => '')
+    console.log('[CalDAV] UID conflict, retrying (attempt', retryCount + 1, '):', body)
+    if (retryCount < 3) {
+      return createEvent(formData, retryCount + 1)
+    }
+    throw new CalDAVError(
+      `Failed to create event: UID conflict after retries (${response.status}): ${response.statusText || body}`,
+      response.status
+    )
+  }
   if (!response.ok && response.status !== 201) {
-    throw new CalDAVError(`Failed to create event: ${response.statusText}`, response.status)
+    const body = await response.text().catch(() => '')
+    console.log('[CalDAV] Create event error body:', body)
+    throw new CalDAVError(
+      `Failed to create event (HTTP ${response.status}): ${response.statusText || body}`,
+      response.status
+    )
   }
 
   const etag = response.headers.get('ETag')?.replace(/"/g, '') || ''
@@ -93,6 +114,9 @@ export async function createEvent(formData: EventFormData): Promise<CalendarEven
 export async function updateEvent(event: CalendarEvent, formData: EventFormData): Promise<CalendarEvent> {
   const icsData = generateICS({ ...formData, uid: event.uid })
 
+  console.log('[CalDAV] Updating event at:', event.href)
+  console.log('[CalDAV] ICS data:', icsData)
+
   const response = await authenticatedFetch(event.href, {
     method: 'PUT',
     headers: {
@@ -101,6 +125,8 @@ export async function updateEvent(event: CalendarEvent, formData: EventFormData)
     },
     body: icsData
   })
+
+  console.log('[CalDAV] Update event response:', response.status, response.statusText)
 
   if (response.status === 401) {
     throw new AuthenticationError()
@@ -112,7 +138,12 @@ export async function updateEvent(event: CalendarEvent, formData: EventFormData)
     throw new ConflictError('Event was modified by another client', event.etag)
   }
   if (!response.ok && response.status !== 204) {
-    throw new CalDAVError(`Failed to update event: ${response.statusText}`, response.status)
+    const body = await response.text().catch(() => '')
+    console.log('[CalDAV] Update event error body:', body)
+    throw new CalDAVError(
+      `Failed to update event (HTTP ${response.status}): ${response.statusText || body}`,
+      response.status
+    )
   }
 
   const etag = response.headers.get('ETag')?.replace(/"/g, '') || event.etag

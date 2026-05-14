@@ -1,46 +1,6 @@
-import { XMLParser } from 'fast-xml-parser'
+import { parser, extractProp, type PropfindResponse, type PropfindResponseItem } from '../lib/xml-utils'
 
-const parser = new XMLParser({
-  ignoreAttributes: false,
-  attributeNamePrefix: '@_',
-  textNodeName: '#text',
-  parseAttributeValue: true,
-  trimValues: true,
-  removeNSPrefix: true
-})
-
-interface PropfindResponse {
-  multistatus?: {
-    response?: PropfindResponseItem | PropfindResponseItem[]
-  }
-}
-
-interface PropfindResponseItem {
-  href: string
-  propstat?:
-    | {
-        prop: Record<string, unknown>
-      }
-    | {
-        prop: Record<string, unknown>
-      }[]
-}
-
-function extractProp(propstat: unknown): Record<string, unknown> | null {
-  if (!propstat) return null
-  if (Array.isArray(propstat)) {
-    for (const p of propstat) {
-      if (p.prop) {
-        return p.prop as Record<string, unknown>
-      }
-    }
-    return null
-  }
-  if (typeof propstat === 'object' && 'prop' in propstat) {
-    return (propstat.prop as Record<string, unknown>) || null
-  }
-  return null
-}
+export type { PropfindResponse, PropfindResponseItem }
 
 export function parseCurrentUserPrincipal(xml: string): string | null {
   try {

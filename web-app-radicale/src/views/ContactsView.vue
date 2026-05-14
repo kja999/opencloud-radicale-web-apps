@@ -2,31 +2,23 @@
   <div class="contacts-root">
     <div class="contacts-header">
       <h2 class="contacts-title">{{ t('Contacts') }}</h2>
+      <input v-model="searchQuery" type="text" class="contacts-search" :placeholder="t('Search contacts...')" />
       <button class="contacts-btn-primary" @click="openNewContact">+ {{ t('New Contact') }}</button>
     </div>
 
     <div class="contacts-body">
-      <aside class="contacts-sidebar">
-        <h3 class="contacts-sidebar-title">{{ t('Address Books') }}</h3>
-        <div v-for="ab in addressbooks" :key="ab.href" class="contacts-sidebar-item">
-          <input type="checkbox" :checked="ab.visible" @change="toggleAddressbook(ab)" />
-          <span class="contacts-dot" :style="{ backgroundColor: ab.color }"></span>
-          <span class="contacts-sidebar-label">{{ ab.displayName }}</span>
-        </div>
-        <div v-if="loading" class="contacts-info">{{ t('Loading...') }}</div>
-        <div v-if="error" class="contacts-error">{{ t('Error loading data') }}</div>
-      </aside>
-
       <main class="contacts-main">
+        <div v-if="saveError" class="contacts-save-error">
+          {{ t('Failed to save: ') + saveError }}
+          <button class="contacts-save-error-dismiss" @click="saveError = null">{{ t('Dismiss') }}</button>
+        </div>
         <div v-if="loading" class="contacts-loading">{{ t('Loading...') }}</div>
         <div v-else-if="allContacts.length === 0" class="contacts-empty">{{ t('No contacts') }}</div>
         <div v-else class="contacts-grid">
-          <div
-            v-for="contact in allContacts"
-            :key="contact.uid"
-            class="contact-card"
-            @click="openContact(contact)"
-          >
+          <div class="contacts-count">
+            {{ t('Showing') }} {{ allContacts.length }} {{ t('of') }} {{ contacts.length }} {{ t('contacts') }}
+          </div>
+          <div v-for="contact in allContacts" :key="contact.uid" class="contact-card" @click="openContact(contact)">
             <div class="contact-avatar" :style="{ backgroundColor: getContactColor(contact) }">
               {{ contact.fn.charAt(0).toUpperCase() }}
             </div>
@@ -66,15 +58,23 @@ const addressbooks = ref<Addressbook[]>([])
 const contacts = ref<Contact[]>([])
 const loading = ref(true)
 const error = ref(false)
+const saveError = ref<string | null>(null)
 const showContactModal = ref(false)
 const selectedContact = ref<Contact | null>(null)
 const selectedAddressbook = ref('')
+const searchQuery = ref('')
 
 const allContacts = computed(() => {
-  const visibleAddressbooks = addressbooks.value.filter(ab => ab.visible)
-  return contacts.value
-    .filter(c => visibleAddressbooks.some(ab => ab.href === getAddressbookHref(c)))
-    .sort((a, b) => a.fn.localeCompare(b.fn))
+  const query = searchQuery.value.toLowerCase().trim()
+  const filtered = query
+    ? contacts.value.filter(
+        c =>
+          c.fn.toLowerCase().includes(query) ||
+          c.organization?.toLowerCase().includes(query) ||
+          c.email?.some(e => e.toLowerCase().includes(query))
+      )
+    : contacts.value
+  return filtered.toSorted((a, b) => a.fn.localeCompare(b.fn))
 })
 
 function getAddressbookHref(contact: Contact): string {
@@ -103,13 +103,9 @@ async function loadData() {
   }
 }
 
-function toggleAddressbook(ab: Addressbook) {
-  ab.visible = !ab.visible
-}
-
 function openNewContact() {
   selectedContact.value = null
-  selectedAddressbook.value = addressbooks.value.find(ab => ab.visible)?.href || addressbooks.value[0]?.href || ''
+  selectedAddressbook.value = addressbooks.value[0]?.href || ''
   showContactModal.value = true
 }
 
@@ -134,6 +130,7 @@ async function saveContact(formData: ContactFormData) {
     await loadData()
     closeContactModal()
   } catch (e) {
+    saveError.value = e instanceof Error ? e.message : String(e)
     console.error('Failed to save contact:', e)
   }
 }
@@ -144,6 +141,7 @@ async function deleteContact(contact: Contact) {
     await loadData()
     closeContactModal()
   } catch (e) {
+    saveError.value = e instanceof Error ? e.message : String(e)
     console.error('Failed to delete contact:', e)
   }
 }
@@ -159,74 +157,50 @@ onMounted(() => {
   flex-direction: column;
   height: 100%;
   font-family: inherit;
-  color: var(--oc-color-text-default, #333);
-  background: var(--oc-color-background-default, #fff);
+  color: var(--oc-role-on-surface, #191c1d);
+  background: var(--oc-role-surface, #ffffff);
 }
 .contacts-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--oc-color-border, #e2e8f0);
+  border-bottom: 1px solid var(--oc-role-outline-variant, #bfc8cc);
 }
 .contacts-title {
   font-size: 1.2em;
   font-weight: 600;
   margin: 0;
 }
+.contacts-search {
+  flex: 1;
+  max-width: 300px;
+  padding: 8px 12px;
+  border: 1px solid var(--oc-role-outline-variant, #bfc8cc);
+  border-radius: 4px;
+  font-size: 0.9em;
+  margin: 0 16px;
+}
+.contacts-search:focus {
+  outline: none;
+  border-color: var(--oc-role-primary, #00677f);
+}
 .contacts-btn-primary {
   padding: 8px 16px;
-  background: var(--oc-color-swatch-primary-default, #0070f3);
-  color: #fff;
+  background: var(--oc-role-primary, #00677f);
+  color: var(--oc-role-on-primary, #ffffff);
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9em;
 }
 .contacts-btn-primary:hover {
-  background: var(--oc-color-swatch-primary-hover, #005bb5);
+  background: #004d5e;
 }
 .contacts-body {
   display: flex;
   flex: 1;
   overflow: hidden;
-}
-.contacts-sidebar {
-  width: 200px;
-  border-right: 1px solid var(--oc-color-border, #e2e8f0);
-  padding: 12px;
-  overflow-y: auto;
-}
-.contacts-sidebar-title {
-  font-weight: 600;
-  margin-bottom: 12px;
-  font-size: 0.9em;
-}
-.contacts-sidebar-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-  font-size: 0.85em;
-}
-.contacts-sidebar-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.contacts-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.contacts-info {
-  font-size: 0.8em;
-  color: var(--oc-color-text-muted, #6b7280);
-}
-.contacts-error {
-  font-size: 0.8em;
-  color: var(--oc-color-swatch-danger-default, #dc2626);
 }
 .contacts-main {
   flex: 1;
@@ -238,24 +212,30 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: var(--oc-color-text-muted, #6b7280);
+  color: var(--oc-role-on-surface-variant, #40484c);
 }
 .contacts-empty {
   text-align: center;
   padding: 48px 16px;
-  color: var(--oc-color-text-muted, #6b7280);
+  color: var(--oc-role-on-surface-variant, #40484c);
 }
 .contacts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 12px;
 }
+.contacts-count {
+  grid-column: 1 / -1;
+  font-size: 0.85em;
+  color: var(--oc-role-on-surface-variant, #40484c);
+  padding: 4px 0;
+}
 .contact-card {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px;
-  border: 1px solid var(--oc-color-border, #e2e8f0);
+  border: 1px solid var(--oc-role-outline-variant, #bfc8cc);
   border-radius: 8px;
   cursor: pointer;
   transition: box-shadow 0.15s;
@@ -287,17 +267,44 @@ onMounted(() => {
 }
 .contact-org {
   font-size: 0.85em;
-  color: var(--oc-color-text-muted, #6b7280);
+  color: var(--oc-role-on-surface-variant, #40484c);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .contact-email {
   font-size: 0.85em;
-  color: var(--oc-color-text-muted, #6b7280);
+  color: var(--oc-role-on-surface-variant, #40484c);
   margin-top: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.contacts-save-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  margin: 16px;
+  background: color-mix(in srgb, var(--oc-role-error-container, #ffdad6) 15%, transparent);
+  border: 1px solid var(--oc-role-error, #ba1a1a);
+  border-radius: 4px;
+  color: var(--oc-role-error, #ba1a1a);
+  font-size: 0.85rem;
+}
+.contacts-save-error-dismiss {
+  padding: 4px 12px;
+  border: 1px solid var(--oc-role-error, #ba1a1a);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--oc-role-error, #ba1a1a);
+  cursor: pointer;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.contacts-save-error-dismiss:hover {
+  background: var(--oc-role-error, #ba1a1a);
+  color: var(--oc-role-on-error, #ffffff);
 }
 </style>

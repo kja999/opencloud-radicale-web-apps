@@ -7,6 +7,14 @@ export interface Addressbook {
   visible: boolean
 }
 
+export interface ContactAddress {
+  street?: string
+  city?: string
+  region?: string
+  postcode?: string
+  country?: string
+}
+
 export interface Contact {
   uid: string
   href: string
@@ -15,11 +23,12 @@ export interface Contact {
   fn: string
   email?: string[]
   tel?: string[]
-  address?: string[]
+  address?: ContactAddress[]
   organization?: string
   title?: string
   photo?: string
   note?: string
+  birthday?: string
 }
 
 export interface ContactFormData {
@@ -27,11 +36,12 @@ export interface ContactFormData {
   fn: string
   email?: string[]
   tel?: string[]
-  address?: string[]
+  address?: ContactAddress[]
   organization?: string
   title?: string
   photo?: string
   note?: string
+  birthday?: string
   addressbookHref: string
 }
 

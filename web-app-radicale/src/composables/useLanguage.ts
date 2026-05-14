@@ -40,9 +40,26 @@ const messages: Record<string, Record<string, string>> = {
     'No contacts': 'No contacts',
     'Loading...': 'Loading...',
     'Error loading data': 'Error loading data',
+    Dismiss: 'Dismiss',
     'Recurring event': 'Recurring event',
     'First Name': 'First Name',
-    'Last Name': 'Last Name'
+    'Last Name': 'Last Name',
+    'End must be after start': 'End must be after start',
+    Repeat: 'Repeat',
+    Frequency: 'Frequency',
+    Every: 'Every',
+    Ends: 'Ends',
+    Never: 'Never',
+    After: 'After',
+    'On date': 'On date',
+    occurrences: 'occurrences',
+    Daily: 'Daily',
+    Weekly: 'Weekly',
+    Monthly: 'Monthly',
+    Yearly: 'Yearly',
+    'This event only': 'This event only',
+    'This and future events': 'This and future events',
+    'All events in series': 'All events in series'
   },
   de: {
     'Web Calendar': 'Kalender',
@@ -82,7 +99,23 @@ const messages: Record<string, Record<string, string>> = {
     'No contacts': 'Keine Kontakte',
     'Loading...': 'Laden...',
     'Error loading data': 'Fehler beim Laden',
-    'Recurring event': 'Wiederkehrender Termin'
+    'Recurring event': 'Wiederkehrender Termin',
+    'End must be after start': 'Ende muss nach Start liegen',
+    Repeat: 'Wiederholen',
+    Frequency: 'Häufigkeit',
+    Every: 'Alle',
+    Ends: 'Endet',
+    Never: 'Nie',
+    After: 'Nach',
+    'On date': 'Am Datum',
+    occurrences: 'Wiederholungen',
+    Daily: 'Täglich',
+    Weekly: 'Wöchentlich',
+    Monthly: 'Monatlich',
+    Yearly: 'Jährlich',
+    'This event only': 'Nur dieses Ereignis',
+    'This and future events': 'Dieses und zukünftige Ereignisse',
+    'All events in series': 'Alle Ereignisse der Serie'
   }
 }
 

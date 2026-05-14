@@ -1,28 +1,52 @@
-import type { Contact, ContactFormData } from '../types/contacts'
+import type { Contact, ContactFormData, ContactAddress } from '../types/contacts'
+
+function unescapeVCardText(text: string): string {
+  return text.replace(/\\n/gi, '\n').replace(/\\;/g, ';').replace(/\\,/g, ',').replace(/\\\\/g, '\\')
+}
 
 export function parseVCard(vcardData: string, href: string, etag: string): Contact | null {
   try {
-    const lines = vcardData.split(/\r?\n/)
+    const unfoldedLines: string[] = []
+    const rawLines = vcardData.split(/\r?\n/)
+    for (const line of rawLines) {
+      if (line.startsWith(' ') || line.startsWith('\t')) {
+        if (unfoldedLines.length > 0) {
+          unfoldedLines[unfoldedLines.length - 1] += line.substring(1)
+        }
+      } else {
+        unfoldedLines.push(line)
+      }
+    }
+
     let fn = ''
     const email: string[] = []
     const tel: string[] = []
-    const address: string[] = []
+    const address: ContactAddress[] = []
     let organization = ''
     let title = ''
     let photo = ''
     let note = ''
     let uid = ''
+    let nValue = ''
+    let birthday = ''
 
-    for (const line of lines) {
+    for (const line of unfoldedLines) {
+      if (!line.trim()) continue
+
       const colonIndex = line.indexOf(':')
       if (colonIndex === -1) continue
 
-      const key = line.substring(0, colonIndex).toUpperCase()
-      const value = line.substring(colonIndex + 1).trim()
+      const keyPart = line.substring(0, colonIndex)
+      const baseKey = keyPart.split(';')[0].toUpperCase()
+      const rawValue = line.substring(colonIndex + 1).trim()
+      const value = unescapeVCardText(rawValue)
 
-      switch (key) {
+      switch (baseKey) {
         case 'FN':
           fn = value
+          break
+        case 'N':
+          nValue = rawValue
           break
         case 'EMAIL':
           email.push(value)
@@ -30,9 +54,17 @@ export function parseVCard(vcardData: string, href: string, etag: string): Conta
         case 'TEL':
           tel.push(value)
           break
-        case 'ADR':
-          address.push(value)
+        case 'ADR': {
+          const parts = rawValue.split(';')
+          address.push({
+            street: parts[2] || undefined,
+            city: parts[3] || undefined,
+            region: parts[4] || undefined,
+            postcode: parts[5] || undefined,
+            country: parts[6] || undefined
+          })
           break
+        }
         case 'ORG':
           organization = value
           break
@@ -45,13 +77,26 @@ export function parseVCard(vcardData: string, href: string, etag: string): Conta
         case 'NOTE':
           note = value
           break
+        case 'BDAY':
+          birthday = value
+          break
         case 'UID':
           uid = value
           break
       }
     }
 
-    if (!fn) return null
+    if (!fn && nValue) {
+      const parts = nValue.split(';')
+      const lastName = parts[0] || ''
+      const firstName = parts[1] || ''
+      fn = [firstName, lastName].filter(p => p.trim()).join(' ') || lastName
+    }
+
+    if (!fn) {
+      console.log('[parseVCard] Skipping contact - no FN:', href, 'N value:', nValue)
+      return null
+    }
 
     return {
       uid: uid || generateUID(),
@@ -65,7 +110,8 @@ export function parseVCard(vcardData: string, href: string, etag: string): Conta
       organization: organization || undefined,
       title: title || undefined,
       photo: photo || undefined,
-      note: note || undefined
+      note: note || undefined,
+      birthday: birthday || undefined
     }
   } catch {
     return null
@@ -89,7 +135,9 @@ export function generateVCard(formData: ContactFormData): string {
 
   if (formData.address?.length) {
     for (const a of formData.address) {
-      lines.push(`ADR:;;${escapeVCardText(a)}`)
+      lines.push(
+        `ADR:;;${escapeVCardText(a.street || '')};${escapeVCardText(a.city || '')};${escapeVCardText(a.region || '')};${escapeVCardText(a.postcode || '')};${escapeVCardText(a.country || '')}`
+      )
     }
   }
 
@@ -105,8 +153,12 @@ export function generateVCard(formData: ContactFormData): string {
     lines.push(`PHOTO:${formData.photo}`)
   }
 
+  if (formData.birthday) {
+    lines.push(`BDAY:${formData.birthday}`)
+  }
+
   if (formData.note) {
-    lines.push(`NOTE:${escapeVCardText(formData.note)}`)
+    lines.push(`NOTE:${escapeVCardText(formData.note.replace(/\n/g, '\\n'))}`)
   }
 
   lines.push(`UID:${generateUID()}`)

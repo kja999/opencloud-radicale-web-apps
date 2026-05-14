@@ -48,6 +48,7 @@ export interface EventFormData {
   allDay: boolean
   description?: string
   location?: string
+  color?: string
   calendarHref: string
   recurrence?: RecurrenceRule
 }

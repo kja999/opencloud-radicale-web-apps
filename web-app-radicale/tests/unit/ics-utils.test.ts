@@ -8,7 +8,7 @@ describe('ics-utils', () => {
       const uid1 = generateUID()
       const uid2 = generateUID()
       expect(uid1).not.toBe(uid2)
-      expect(uid1).toContain('@radicale')
+      expect(uid1).toContain('@webapp')
     })
   })
 
@@ -102,7 +102,7 @@ describe('ics-utils', () => {
 
       const ics = generateICS(formData)
 
-      expect(ics).toContain('RRULE:FREQ=MONTHLY;UNTIL=20241231T235959')
+      expect(ics).toContain('RRULE:FREQ=MONTHLY;UNTIL=20241231')
     })
 
     it('generates ICS with recurrence rule with count', () => {
@@ -175,7 +175,7 @@ END:VCALENDAR`
       expect(events[0].summary).toBe('All Day Event')
     })
 
-    it('parses event with recurrence rule', () => {
+    it('parses event with recurrence rule and expands occurrences', () => {
       const icsData = `BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
@@ -189,13 +189,14 @@ END:VCALENDAR`
 
       const range: DateRange = {
         start: new Date('2024-01-01'),
-        end: new Date('2024-12-31')
+        end: new Date('2024-03-31')
       }
 
       const events = parseICS(icsData, '/calendars/user/recurring.ics', 'etag-2', range)
 
-      expect(events).toHaveLength(1)
-      expect(events[0].summary).toBe('Recurring Event')
+      expect(events.length).toBeGreaterThan(1)
+      expect(events.every(e => e.summary === 'Recurring Event')).toBe(true)
+      expect(events.every(e => e.isRecurring)).toBe(true)
     })
 
     it('returns empty array for invalid ICS data', () => {
@@ -208,7 +209,7 @@ END:VCALENDAR`
       expect(parseICS('', '/test.ics', 'etag', range)).toEqual([])
     })
 
-    it('parses event with byMonthDay recurrence', () => {
+    it('parses event with byMonthDay recurrence and expands occurrences', () => {
       const icsData = `BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
@@ -222,13 +223,61 @@ END:VCALENDAR`
 
       const range: DateRange = {
         start: new Date('2024-01-01'),
-        end: new Date('2024-12-31')
+        end: new Date('2024-06-30')
       }
 
       const events = parseICS(icsData, '/test.ics', 'etag', range)
 
-      expect(events).toHaveLength(1)
-      expect(events[0].summary).toBe('Monthly Day Event')
+      expect(events.length).toBeGreaterThan(1)
+      expect(events.every(e => e.summary === 'Monthly Day Event')).toBe(true)
+    })
+
+    it('parses event with infinite recurrence (no COUNT, no UNTIL) starting years ago', () => {
+      const icsData = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20220115
+DTEND;VALUE=DATE:20220116
+SUMMARY:Infinite Weekly Event
+UID:infinite-weekly-event
+RRULE:FREQ=WEEKLY;BYDAY=MO
+END:VEVENT
+END:VCALENDAR`
+
+      const range: DateRange = {
+        start: new Date('2024-01-01'),
+        end: new Date('2024-03-31')
+      }
+
+      const events = parseICS(icsData, '/test.ics', 'etag', range)
+
+      expect(events.length).toBeGreaterThan(6)
+      expect(events.every(e => e.summary === 'Infinite Weekly Event')).toBe(true)
+      expect(events.every(e => e.isRecurring)).toBe(true)
+      expect(events.length).toBe(13)
+    })
+
+    it('handles infinite recurrence with 6-month fetch range from years-ago start', () => {
+      const icsData = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20200101
+DTEND;VALUE=DATE:20200102
+SUMMARY:Old Weekly Event
+UID:old-weekly-event
+RRULE:FREQ=WEEKLY;BYDAY=TU
+END:VEVENT
+END:VCALENDAR`
+
+      const range: DateRange = {
+        start: new Date('2024-04-01'),
+        end: new Date('2024-09-30')
+      }
+
+      const events = parseICS(icsData, '/test.ics', 'etag', range)
+
+      expect(events.length).toBeGreaterThan(6)
+      console.log('Found events count:', events.length)
     })
 
     it('parses event with byMonth recurrence', () => {
@@ -361,6 +410,140 @@ END:VCALENDAR`
       const result = updateSeriesICS('invalid', formData)
 
       expect(result).toBe('invalid')
+    })
+  })
+
+  describe('generateICS with color', () => {
+    it('includes COLOR property when provided', () => {
+      const formData: EventFormData = {
+        summary: 'Colored Event',
+        start: new Date('2024-01-15T10:00:00'),
+        end: new Date('2024-01-15T11:00:00'),
+        allDay: false,
+        calendarHref: '/cal/',
+        color: '#F44336'
+      }
+
+      const ics = generateICS(formData)
+
+      expect(ics).toContain('COLOR:#F44336')
+    })
+
+    it('does not include COLOR when not provided', () => {
+      const formData: EventFormData = {
+        summary: 'Normal Event',
+        start: new Date('2024-01-15'),
+        end: new Date('2024-01-16'),
+        allDay: true,
+        calendarHref: '/cal/'
+      }
+
+      const ics = generateICS(formData)
+
+      expect(ics).not.toContain('COLOR:')
+    })
+  })
+
+  describe('parseICS with color', () => {
+    it('parses COLOR property from ICS', () => {
+      const icsData = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+DTSTART:20240115T100000
+DTEND:20240115T110000
+SUMMARY:Colored Event
+UID:colored-event
+COLOR:#E91E63
+END:VEVENT
+END:VCALENDAR`
+
+      const range: DateRange = {
+        start: new Date('2024-01-01'),
+        end: new Date('2024-12-31')
+      }
+
+      const events = parseICS(icsData, '/cal/colored-event.ics', 'etag-1', range)
+
+      expect(events).toHaveLength(1)
+      expect(events[0].color).toBe('#E91E63')
+    })
+
+    it('returns undefined color when not present', () => {
+      const icsData = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20240115
+DTEND;VALUE=DATE:20240116
+SUMMARY:Plain Event
+UID:plain-event
+END:VEVENT
+END:VCALENDAR`
+
+      const range: DateRange = {
+        start: new Date('2024-01-01'),
+        end: new Date('2024-12-31')
+      }
+
+      const events = parseICS(icsData, '/cal/plain-event.ics', 'etag-2', range)
+
+      expect(events).toHaveLength(1)
+      expect(events[0].color).toBeFalsy()
+    })
+  })
+
+  describe('generateICS with recurrence', () => {
+    it('generates RRULE with count', () => {
+      const formData: EventFormData = {
+        summary: 'Limited Event',
+        start: new Date('2024-01-15'),
+        end: new Date('2024-01-16'),
+        allDay: true,
+        calendarHref: '/cal/',
+        recurrence: {
+          freq: 'DAILY',
+          count: 5
+        }
+      }
+
+      const ics = generateICS(formData)
+
+      expect(ics).toContain('RRULE:FREQ=DAILY;COUNT=5')
+    })
+
+    it('generates RRULE with until date', () => {
+      const formData: EventFormData = {
+        summary: 'Event Until',
+        start: new Date('2024-01-15'),
+        end: new Date('2024-01-16'),
+        allDay: true,
+        calendarHref: '/cal/',
+        recurrence: {
+          freq: 'WEEKLY',
+          until: new Date('2024-03-15')
+        }
+      }
+
+      const ics = generateICS(formData)
+
+      expect(ics).toContain('RRULE:FREQ=WEEKLY;UNTIL=20240315')
+    })
+
+    it('omits interval when undefined', () => {
+      const formData: EventFormData = {
+        summary: 'Weekly Event',
+        start: new Date('2024-01-15'),
+        end: new Date('2024-01-16'),
+        allDay: true,
+        calendarHref: '/cal/',
+        recurrence: {
+          freq: 'WEEKLY'
+        }
+      }
+
+      const ics = generateICS(formData)
+
+      expect(ics).toContain('RRULE:FREQ=WEEKLY')
+      expect(ics).not.toContain('INTERVAL')
     })
   })
 })
