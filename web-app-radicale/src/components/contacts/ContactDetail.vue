@@ -47,26 +47,41 @@
             </svg>
           </div>
           <div class="contact-detail-text">
-            <a v-for="(e, idx) in contact.email" :key="idx" :href="`mailto:${e}`" class="contact-detail-link">{{ e }}</a>
+            <div v-for="(e, idx) in contact.email" :key="idx" class="contact-detail-labeled-item">
+              <span v-if="e.label" class="contact-detail-label">{{ e.label }}</span>
+              <a :href="`mailto:${e.value}`" class="contact-detail-link">{{ e.value }}</a>
+            </div>
           </div>
         </div>
 
         <div v-if="contact.tel?.length" class="contact-detail-section">
           <div class="contact-detail-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
+              <path
+                d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"
+              />
             </svg>
           </div>
           <div class="contact-detail-text">
-            <a v-for="(t, idx) in contact.tel" :key="idx" :href="`tel:${t}`" class="contact-detail-link">{{ t }}</a>
+            <div v-for="(t, idx) in contact.tel" :key="idx" class="contact-detail-labeled-item">
+              <span v-if="t.label" class="contact-detail-label">{{ t.label }}</span>
+              <a :href="`tel:${t.value}`" class="contact-detail-link">{{ t.value }}</a>
+            </div>
           </div>
         </div>
 
         <div v-if="contact.birthday" class="contact-detail-section">
           <div class="contact-detail-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" />
-              <path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" />
+              <path d="M20 21v-8a2 2 0 00-2-2H6a2 2 0 00-2 2v8" />
+              <path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1" />
+              <path d="M2 21h20" />
+              <path d="M7 8v2" />
+              <path d="M12 8v2" />
+              <path d="M17 8v2" />
+              <path d="M7 4h.01" />
+              <path d="M12 4h.01" />
+              <path d="M17 4h.01" />
             </svg>
           </div>
           <div class="contact-detail-text">{{ formatBirthday(contact.birthday) }}</div>
@@ -110,7 +125,7 @@ import { t as translate } from '../../composables/useLanguage'
 
 const t = translate
 
-const props = defineProps<{
+defineProps<{
   contact: Contact
   color: string
 }>()
@@ -252,6 +267,25 @@ function formatBirthday(bday: string): string {
 
 .contact-detail-link:hover {
   text-decoration: underline;
+}
+
+.contact-detail-labeled-item {
+  margin-bottom: 4px;
+}
+
+.contact-detail-labeled-item:last-child {
+  margin-bottom: 0;
+}
+
+.contact-detail-label {
+  display: inline-block;
+  font-size: 0.75rem;
+  text-transform: capitalize;
+  padding: 2px 6px;
+  background: var(--oc-role-surface-container-high, #f5f7f8);
+  border-radius: 4px;
+  margin-right: 6px;
+  color: var(--oc-role-on-surface-variant, #40484c);
 }
 
 .contact-detail-address {

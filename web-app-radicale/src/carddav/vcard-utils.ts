@@ -1,7 +1,18 @@
-import type { Contact, ContactFormData, ContactAddress } from '../types/contacts'
+import type { Contact, ContactFormData, ContactAddress, LabeledValue } from '../types/contacts'
 
 function unescapeVCardText(text: string): string {
   return text.replace(/\\n/gi, '\n').replace(/\\;/g, ';').replace(/\\,/g, ',').replace(/\\\\/g, '\\')
+}
+
+function extractType(keyPart: string, _baseKey: string): string | null {
+  const parts = keyPart.split(';')
+  for (const part of parts) {
+    const [k, v] = part.split('=')
+    if (k && k.toUpperCase() === 'TYPE' && v) {
+      return v.toLowerCase()
+    }
+  }
+  return null
 }
 
 export function parseVCard(vcardData: string, href: string, etag: string): Contact | null {
@@ -19,8 +30,8 @@ export function parseVCard(vcardData: string, href: string, etag: string): Conta
     }
 
     let fn = ''
-    const email: string[] = []
-    const tel: string[] = []
+    const email: LabeledValue[] = []
+    const tel: LabeledValue[] = []
     const address: ContactAddress[] = []
     let organization = ''
     let title = ''
@@ -48,12 +59,16 @@ export function parseVCard(vcardData: string, href: string, etag: string): Conta
         case 'N':
           nValue = rawValue
           break
-        case 'EMAIL':
-          email.push(value)
+        case 'EMAIL': {
+          const label = extractType(keyPart, 'EMAIL')
+          email.push({ value, label: label || undefined })
           break
-        case 'TEL':
-          tel.push(value)
+        }
+        case 'TEL': {
+          const label = extractType(keyPart, 'TEL')
+          tel.push({ value, label: label || undefined })
           break
+        }
         case 'ADR': {
           const parts = rawValue.split(';')
           address.push({
@@ -123,13 +138,15 @@ export function generateVCard(formData: ContactFormData): string {
 
   if (formData.email?.length) {
     for (const e of formData.email) {
-      lines.push(`EMAIL:${escapeVCardText(e)}`)
+      const typePart = e.label ? `;TYPE=${e.label.toUpperCase()}` : ''
+      lines.push(`EMAIL${typePart}:${escapeVCardText(e.value)}`)
     }
   }
 
   if (formData.tel?.length) {
     for (const t of formData.tel) {
-      lines.push(`TEL:${escapeVCardText(t)}`)
+      const typePart = t.label ? `;TYPE=${t.label.toUpperCase()}` : ''
+      lines.push(`TEL${typePart}:${escapeVCardText(t.value)}`)
     }
   }
 

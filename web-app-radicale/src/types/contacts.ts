@@ -15,14 +15,19 @@ export interface ContactAddress {
   country?: string
 }
 
+export interface LabeledValue {
+  value: string
+  label?: string
+}
+
 export interface Contact {
   uid: string
   href: string
   etag: string
   vcardData: string
   fn: string
-  email?: string[]
-  tel?: string[]
+  email?: LabeledValue[]
+  tel?: LabeledValue[]
   address?: ContactAddress[]
   organization?: string
   title?: string
@@ -34,8 +39,8 @@ export interface Contact {
 export interface ContactFormData {
   uid?: string
   fn: string
-  email?: string[]
-  tel?: string[]
+  email?: LabeledValue[]
+  tel?: LabeledValue[]
   address?: ContactAddress[]
   organization?: string
   title?: string

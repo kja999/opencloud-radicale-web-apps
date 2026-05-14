@@ -14,8 +14,14 @@
         <div class="contact-modal-field">
           <label class="contact-modal-label">{{ t('Email') }}</label>
           <div v-for="(_, idx) in form.email" :key="idx" class="contact-modal-input-row">
+            <select v-model="form.email[idx].label" class="contact-modal-select">
+              <option value="">Type</option>
+              <option value="work">{{ t('Work') }}</option>
+              <option value="home">{{ t('Home') }}</option>
+              <option value="other">{{ t('Other') }}</option>
+            </select>
             <input
-              v-model="form.email[idx]"
+              v-model="form.email[idx].value"
               type="email"
               class="contact-modal-input contact-modal-input-flex"
               placeholder="email@example.com"
@@ -28,8 +34,15 @@
         <div class="contact-modal-field">
           <label class="contact-modal-label">{{ t('Phone') }}</label>
           <div v-for="(_, idx) in form.tel" :key="idx" class="contact-modal-input-row">
+            <select v-model="form.tel[idx].label" class="contact-modal-select">
+              <option value="">Type</option>
+              <option value="cell">{{ t('Mobile') }}</option>
+              <option value="work">{{ t('Work') }}</option>
+              <option value="home">{{ t('Home') }}</option>
+              <option value="other">{{ t('Other') }}</option>
+            </select>
             <input
-              v-model="form.tel[idx]"
+              v-model="form.tel[idx].value"
               type="tel"
               class="contact-modal-input contact-modal-input-flex"
               placeholder="+1 234 567 8900"
@@ -143,6 +156,7 @@ const emit = defineEmits<{
 }>()
 
 const emptyAddress = (): ContactAddress => ({ street: '', city: '', region: '', postcode: '', country: '' })
+const emptyLabeledValue = () => ({ value: '', label: '' })
 
 function formatDateForInput(bday: string): string {
   if (!bday || bday.length !== 8) return ''
@@ -156,8 +170,8 @@ function formatDateForSave(bday: string): string {
 
 const form = ref({
   fn: '',
-  email: [''],
-  tel: [''],
+  email: [emptyLabeledValue()],
+  tel: [emptyLabeledValue()],
   address: [emptyAddress()],
   organization: '',
   title: '',
@@ -171,8 +185,8 @@ watch(
     if (c) {
       form.value = {
         fn: c.fn,
-        email: c.email?.length ? [...c.email] : [''],
-        tel: c.tel?.length ? [...c.tel] : [''],
+        email: c.email?.length ? c.email.map(e => ({ value: e.value, label: e.label || '' })) : [emptyLabeledValue()],
+        tel: c.tel?.length ? c.tel.map(t => ({ value: t.value, label: t.label || '' })) : [emptyLabeledValue()],
         address: c.address?.length ? c.address.map(a => ({ ...a })) : [emptyAddress()],
         organization: c.organization || '',
         title: c.title || '',
@@ -182,8 +196,8 @@ watch(
     } else {
       form.value = {
         fn: '',
-        email: [''],
-        tel: [''],
+        email: [emptyLabeledValue()],
+        tel: [emptyLabeledValue()],
         address: [emptyAddress()],
         organization: '',
         title: '',
@@ -196,24 +210,24 @@ watch(
 )
 
 function addEmail() {
-  form.value.email.push('')
+  form.value.email.push(emptyLabeledValue())
 }
 
 function removeEmail(idx: number) {
   form.value.email.splice(idx, 1)
   if (form.value.email.length === 0) {
-    form.value.email.push('')
+    form.value.email.push(emptyLabeledValue())
   }
 }
 
 function addTel() {
-  form.value.tel.push('')
+  form.value.tel.push(emptyLabeledValue())
 }
 
 function removeTel(idx: number) {
   form.value.tel.splice(idx, 1)
   if (form.value.tel.length === 0) {
-    form.value.tel.push('')
+    form.value.tel.push(emptyLabeledValue())
   }
 }
 
@@ -229,14 +243,14 @@ function removeAddress() {
 }
 
 function save() {
-  const email = form.value.email.filter(e => e.trim())
-  const tel = form.value.tel.filter(t => t.trim())
+  const email = form.value.email.filter(e => e.value.trim())
+  const tel = form.value.tel.filter(t => t.value.trim())
   const address = form.value.address.filter(a => a.street || a.city || a.region || a.postcode || a.country)
 
   emit('save', {
     fn: form.value.fn,
-    email: email.length ? email : undefined,
-    tel: tel.length ? tel : undefined,
+    email: email.length ? email.map(e => ({ value: e.value, label: e.label || undefined })) : undefined,
+    tel: tel.length ? tel.map(t => ({ value: t.value, label: t.label || undefined })) : undefined,
     address: address.length ? address : undefined,
     organization: form.value.organization || undefined,
     title: form.value.title || undefined,
@@ -319,6 +333,21 @@ function save() {
 
 .contact-modal-input-flex {
   flex: 1;
+}
+
+.contact-modal-select {
+  padding: 8px 4px;
+  border: 1px solid var(--oc-role-outline-variant, #bfc8cc);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  background: var(--oc-role-surface, #ffffff);
+  color: var(--oc-role-on-surface, #191c1d);
+  min-width: 80px;
+}
+
+.contact-modal-select:focus {
+  outline: none;
+  border-color: var(--oc-role-primary, #00677f);
 }
 
 .contact-modal-remove-btn {

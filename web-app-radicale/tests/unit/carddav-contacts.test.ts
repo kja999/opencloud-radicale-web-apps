@@ -24,8 +24,8 @@ describe('CardDAV Contacts CRUD', () => {
     it('creates contact with correct vCard structure', async () => {
       const formData: ContactFormData = {
         fn: 'John Doe',
-        email: ['john@example.com'],
-        tel: ['+1234567890'],
+        email: [{ value: 'john@example.com', label: 'work' }],
+        tel: [{ value: '+1234567890', label: 'cell' }],
         addressbookHref: '/addressbooks/user/'
       }
 
@@ -40,14 +40,14 @@ describe('CardDAV Contacts CRUD', () => {
       const callArgs = mockFetch.mock.calls[0]
       const vcardBody = callArgs[1].body as string
       expect(vcardBody).toContain('FN:John Doe')
-      expect(vcardBody).toMatch(/EMAIL.*john@example.com/)
-      expect(vcardBody).toMatch(/TEL.*\+1234567890/)
+      expect(vcardBody).toMatch(/EMAIL;TYPE=WORK.*john@example.com/)
+      expect(vcardBody).toMatch(/TEL;TYPE=CELL.*\+1234567890/)
     })
 
     it('creates contact with multiple emails', async () => {
       const formData: ContactFormData = {
         fn: 'Jane Smith',
-        email: ['jane@example.com', 'jane.smith@work.com'],
+        email: [{ value: 'jane@example.com' }, { value: 'jane.smith@work.com', label: 'work' }],
         addressbookHref: '/addressbooks/user/'
       }
 
@@ -127,7 +127,7 @@ describe('CardDAV Contacts CRUD', () => {
 
       const formData: ContactFormData = {
         fn: 'New Name',
-        email: ['new@example.com'],
+        email: [{ value: 'new@example.com' }],
         addressbookHref: '/addressbooks/user/'
       }
 
